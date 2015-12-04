@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * Created by Jan Valentik on 11/20/2015.
  */
-@CDIView("")
+@CDIView(value = "login", supportsParameters = true)
 @ViewMenuItem(icon = FontAwesome.SIGN_IN, title = "Log in / Log out", order = ViewMenuItem.END)
 public class LoginView extends CustomComponent implements View {
 	private TextField username;
@@ -43,10 +43,10 @@ public class LoginView extends CustomComponent implements View {
 	@Inject
 	private CustomAccessControl accessControl;
 
-	@Inject
-	private CustomLoginForm loginFormComponent;
 
 	public void enter(ViewChangeListener.ViewChangeEvent event) {
+		AppUI.getMenu().setVisible(false);
+		System.out.println("LoginView Params: " + event.getParameters() );
 		if (accessControl.isUserSignedIn()) {
 			Notification.show("Log out", "You have been logged out", Notification.Type.TRAY_NOTIFICATION);
 		}
@@ -56,14 +56,15 @@ public class LoginView extends CustomComponent implements View {
 
 	@PostConstruct
 	private void init() {
+		AppUI.getMenu().setVisible(false);
 		username = new TextField();
 		password = new PasswordField();
 		login = new Button();
-		login.addClickListener(clickEvent -> loginFormComponent.login(username.getValue(), password.getValue()));
+		login.addClickListener(clickEvent -> login());
 		addStyleName("login-screen");
 		CssLayout parentLayout = new CssLayout();
 		parentLayout.addStyleName("login-screen");
-		Component loginForm = loginFormComponent.createContent(username, password, login);
+		Component loginForm = buildLoginForm();
 		VerticalLayout centeringLayout = new VerticalLayout();
 		centeringLayout.setStyleName("centering-layout");
 		centeringLayout.addComponent(loginForm);
@@ -96,31 +97,15 @@ public class LoginView extends CustomComponent implements View {
 		return loginInformation;
 	}
 
-	private void requestAccess() {
-		username.setValue("");
-		password.setValue("");
-		UI.getCurrent().addWindow(new AddUserView(userService));
-	}
-}
-
-class CustomLoginForm extends com.ejt.vaadin.loginform.LoginForm {
-	@Inject
-	private UserInfo currentUser;
-
-	@Inject
-	private UserService userService;
-
-
-	@Override
-	protected FormLayout createContent(TextField userName, PasswordField password, Button login) {
+	private FormLayout buildLoginForm() {
 		FormLayout layout = new FormLayout();
 		layout.addStyleName("login-form");
 		layout.setMargin(true);
-		layout.addComponent(userName);
-		userName.setCaption("IBM Intranet ID");
-		userName.setWidth(15, Unit.EM);
-		userName.setDescription("Enter your email");
-		userName.setIcon(VaadinIcons.USER);
+		layout.addComponent(username);
+		username.setCaption("IBM Intranet ID");
+		username.setWidth(15, Unit.EM);
+		username.setDescription("Enter your email");
+		username.setIcon(VaadinIcons.USER);
 		layout.addComponent(password);
 		password.setCaption("Password");
 		password.setWidth(15, Unit.EM);
@@ -142,12 +127,11 @@ class CustomLoginForm extends com.ejt.vaadin.loginform.LoginForm {
 		return layout;
 	}
 
-	@Override
-	protected void login(String userName, String password) {
+	private void login() {
 		User currentUser = new User();
-		currentUser.setUserName(userName);
+		currentUser.setUserName(username.getValue().toLowerCase().trim());
 		try {
-			currentUser.setPassword(MD5Hash.encrypt(password));
+			currentUser.setPassword(MD5Hash.encrypt(password.getValue()));
 		} catch (NoSuchAlgorithmException nx) {
 			nx.printStackTrace();
 			throw new RuntimeException("Failed to encrypt password");
@@ -180,6 +164,12 @@ class CustomLoginForm extends com.ejt.vaadin.loginform.LoginForm {
 			notification.setDelayMsec(2000);
 			notification.show(Page.getCurrent());
 		}
+	}
+
+	private void requestAccess() {
+		username.setValue("");
+		password.setValue("");
+		UI.getCurrent().addWindow(new AddUserView(userService));
 	}
 }
 

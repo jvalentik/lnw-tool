@@ -1,6 +1,8 @@
 package com.ibm.lnw.backend.domain;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -22,9 +24,14 @@ public class Request implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
+	@NotNull
+	@Pattern(regexp = "([a-zA-Z]\\.)+(\\w{5}\\.)+(\\d{3})", message = "WBS must be in format x.xxxxx.xxx")
 	private String leadingWBS;
+	@NotNull
 	private String customerName;
+	@NotNull
 	private String contractNumber;
+
 	private String services;
 	private String pmaName;
 	private String pexName;

@@ -3,16 +3,18 @@ package com.ibm.lnw.presentation.views;
 import com.ibm.lnw.backend.RequestService;
 import com.ibm.lnw.backend.domain.Request;
 import com.ibm.lnw.presentation.AppUI;
-import com.ibm.lnw.presentation.model.CustomAccessControl;
 import com.ibm.lnw.presentation.ScreenSize;
+import com.ibm.lnw.presentation.model.CustomAccessControl;
 import com.vaadin.cdi.CDIView;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.*;
-import org.vaadin.viritin.button.MButton;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import org.vaadin.viritin.fields.MTable;
 import org.vaadin.viritin.label.Header;
 import org.vaadin.viritin.layouts.MHorizontalLayout;
@@ -51,7 +53,7 @@ public class RequestListView extends MVerticalLayout implements View {
 
 	Header header = new Header("Customers").setHeaderLevel(2);
 
-	Button addButton = new MButton(FontAwesome.EDIT, (clickEvent) -> addRequest());
+	//Button addButton = new MButton(FontAwesome.EDIT, (clickEvent) -> addRequest());
 
 	@PostConstruct
 	public void init() {
@@ -72,7 +74,7 @@ public class RequestListView extends MVerticalLayout implements View {
 		removeAllComponents();
 		if (ScreenSize.getScreenSize() == ScreenSize.LARGE) {
 			addComponents(
-					new MHorizontalLayout(header, filter, addButton)
+					new MHorizontalLayout(header, filter)
 							.expand(header)
 							.alignAll(Alignment.MIDDLE_LEFT),
 					mainContent
@@ -81,7 +83,7 @@ public class RequestListView extends MVerticalLayout implements View {
 		} else {
 			addComponents(
 					header,
-					new MHorizontalLayout(filter, addButton)
+					new MHorizontalLayout(filter)
 							.expand(filter)
 							.alignAll(Alignment.MIDDLE_LEFT),
 					mainContent

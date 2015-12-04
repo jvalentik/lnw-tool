@@ -16,15 +16,6 @@ import com.vaadin.ui.UI;
 import javax.inject.Inject;
 import java.util.stream.Stream;
 
-
-
-/**
- * A helper class with basic main layout with ViewMenu and ViewMenuLayout,
- * configures Navigator automatically. This way you'll get professional looking
- * basic application structure for free.
- *
- * In your own app, override this class and map it with CDIUI annotation.
- */
 @CDIUI("")
 @Theme("mytheme")
 @Title("LNW Tool")
@@ -55,6 +46,7 @@ public class AppUI extends UI {
         };
         navigator.addProvider(viewProvider);
         setContent(viewMenuLayout);
+        navigator.navigateTo("login");
     }
 
     public ViewMenuLayout getViewMenuLayout() {
@@ -74,12 +66,6 @@ public class AppUI extends UI {
 
     }
 
-    /**
-     * Workaround for issue 1, related to vaadin issues: 13566, 14884
-     *
-     * @param navigationState the view id that was requested
-     * @param e the exception thrown by Navigator
-     */
     protected void handleNavigationError(String navigationState, Exception e) {
         Notification.show(
                 "The requested view (" + navigationState + ") was not available, "

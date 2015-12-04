@@ -67,6 +67,7 @@ public class AddUserView extends Window implements Property.ValueChangeListener{
 				try {
 					if (userService.findByName(((TextField) userName).getValue()).isEmpty()) {
 						fields.commit();
+						user.setUserName(user.getUserName().toLowerCase().trim());
 						user.setPassword(MD5Hash.encrypt(user.getPassword()));
 						user.setRole(UserRole.Sender);
 						userService.saveOrPersist(user);

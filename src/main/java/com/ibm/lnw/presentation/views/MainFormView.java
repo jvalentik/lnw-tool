@@ -19,6 +19,7 @@ import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.io.File;
@@ -51,21 +52,15 @@ public class MainFormView extends CustomComponent implements View {
 
 
 	public void enter(ViewChangeListener.ViewChangeEvent viewChangeEvent) {
-		if (!accessControl.isUserSignedIn()) {
-			AppUI.getMenu().navigateTo("");
-			Notification.show("User not signed", "Please sign in", Notification.Type.TRAY_NOTIFICATION);
-		}
-		else {
-			if (viewChangeEvent.getOldView().equals("")) {
+		if (viewChangeEvent.getOldView().equals("login")) {
 				Notification.show("Welcome " + accessControl.getFirstName(),
 						"Start by adding WBS", Notification.Type.TRAY_NOTIFICATION);
-			}
 		}
-
 	}
 
 	@PostConstruct
 	public void init() {
+		AppUI.getMenu().setVisible(true);
 		request = new Request();
 		fileContainer = new HashMap<>();
 		request.setSubmitterUserName(accessControl.getPrincipalName());

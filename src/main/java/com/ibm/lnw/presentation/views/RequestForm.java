@@ -42,7 +42,7 @@ public class RequestForm extends AbstractForm<Request> {
     @Override
     protected Component createContent() {
         setStyleName(ValoTheme.LAYOUT_CARD);
-	    HorizontalLayout layout = new HorizontalLayout();
+	    VerticalLayout layout = new VerticalLayout();
 	    Label label = new Label("Request details ...");
 	    label.setStyleName(ValoTheme.LABEL_H2);
         layout.addComponent(label);
@@ -63,6 +63,9 @@ public class RequestForm extends AbstractForm<Request> {
 	    button.setStyleName(ValoTheme.BUTTON_PRIMARY);
 	    formLayout.setStyleName(ValoTheme.LAYOUT_CARD);
 	    layout.addComponent(formLayout);
+	    layout.setComponentAlignment(formLayout, Alignment.MIDDLE_CENTER);
+	    layout.addComponent(button);
+	    layout.setComponentAlignment(button, Alignment.BOTTOM_CENTER);
 	    return layout;
     }
 
@@ -72,10 +75,4 @@ public class RequestForm extends AbstractForm<Request> {
         status.setWidthUndefined();
         status.setOptions(RequestStatus.values());
     }
-
-	@Override
-	protected void adjustResetButtonState() {
-		getResetButton().setEnabled(true);
-
-	}
 }

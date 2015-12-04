@@ -6,6 +6,7 @@ package com.ibm.lnw.presentation.views;
 import com.vaadin.annotations.Title;
 import com.vaadin.cdi.CDIView;
 import com.vaadin.cdi.UIScoped;
+import com.vaadin.cdi.access.AccessControl;
 import com.vaadin.cdi.internal.Conventions;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
@@ -13,8 +14,6 @@ import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
 import com.vaadin.ui.*;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.themes.ValoTheme;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableObject;
@@ -30,23 +29,16 @@ import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Inject;
 import java.util.*;
 
-/**
- * A helper to automatically create a menu from available Vaadin CDI view.
- * Listed views should be annotated with ViewMenuItem annotation to be listed
- * here, there you can also set icon, caption etc.
- *
- * You'll probably want something more sophisticated in your app, but this might
- * be handy prototyping small CRUD apps.
- *
- * By default the menu uses Valo themes responsive layout rules, but those can
- * easily be overridden.
- *
- */
+
 @UIScoped
 public class ViewMenu extends CssLayout {
 
 	@Inject
 	BeanManager beanManager;
+
+	@Inject
+	AccessControl accessControl;
+
 
 	private final Header header = new Header(null).setHeaderLevel(3);
 
@@ -74,28 +66,24 @@ public class ViewMenu extends CssLayout {
 			}
 		}
 
-		Collections.sort(list, new Comparator<Bean<?>>() {
-
-			@Override
-			public int compare(Bean<?> o1, Bean<?> o2) {
-				ViewMenuItem a1 = o1.getBeanClass().
-						getAnnotation(ViewMenuItem.class);
-				ViewMenuItem a2 = o2.getBeanClass().
-						getAnnotation(ViewMenuItem.class);
-				if (a1 == null && a2 == null) {
+		Collections.sort(list, (o1, o2) -> {
+			ViewMenuItem a1 = o1.getBeanClass().
+					getAnnotation(ViewMenuItem.class);
+			ViewMenuItem a2 = o2.getBeanClass().
+					getAnnotation(ViewMenuItem.class);
+			if (a1 == null && a2 == null) {
+				final String name1 = getNameFor(o1.getBeanClass());
+				final String name2 = getNameFor(o2.getBeanClass());
+				return name1.compareTo(name2); // just compare names
+			} else {
+				int order1 = a1 == null ? ViewMenuItem.DEFAULT : a1.order();
+				int order2 = a2 == null ? ViewMenuItem.DEFAULT : a2.order();
+				if (order1 == order2) {
 					final String name1 = getNameFor(o1.getBeanClass());
 					final String name2 = getNameFor(o2.getBeanClass());
 					return name1.compareTo(name2); // just compare names
 				} else {
-					int order1 = a1 == null ? ViewMenuItem.DEFAULT : a1.order();
-					int order2 = a2 == null ? ViewMenuItem.DEFAULT : a2.order();
-					if (order1 == order2) {
-						final String name1 = getNameFor(o1.getBeanClass());
-						final String name2 = getNameFor(o2.getBeanClass());
-						return name1.compareTo(name2); // just compare names
-					} else {
-						return order1 - order2;
-					}
+					return order1 - order2;
 				}
 			}
 		});
@@ -107,14 +95,11 @@ public class ViewMenu extends CssLayout {
 	void init() {
 		createHeader();
 
-		final Button showMenu = new Button("Menu", new ClickListener() {
-			@Override
-			public void buttonClick(final ClickEvent event) {
-				if (getStyleName().contains("valo-menu-visible")) {
-					removeStyleName("valo-menu-visible");
-				} else {
-					addStyleName("valo-menu-visible");
-				}
+		final Button showMenu = new Button("Menu", (clickEvent) -> {
+			if (getStyleName().contains("valo-menu-visible")) {
+				removeStyleName("valo-menu-visible");
+			} else {
+				addStyleName("valo-menu-visible");
 			}
 		});
 		showMenu.addStyleName(ValoTheme.BUTTON_PRIMARY);
@@ -127,27 +112,24 @@ public class ViewMenu extends CssLayout {
 		items.setPrimaryStyleName("valo-menuitems");
 		addComponent(items);
 
-		addAttachListener(new AttachListener() {
-			                  @Override
-			                  public void attach(AttachEvent event) {
-				                  getUI().addStyleName("valo-menu-responsive");
-				                  if (getMenuTitle() == null) {
-					                  setMenuTitle(detectMenuTitle());
-				                  }
-				                  Navigator navigator = UI.getCurrent().getNavigator();
-				                  if (navigator != null) {
-					                  String state = navigator.getState();
-					                  if (state == null) {
-						                  state = "";
-					                  }
-					                  Button b = nameToButton.get(state);
-					                  if (b != null) {
-						                  emphasisAsSelected(b);
-					                  }
-				                  }
-			                  }
-		                  }
-		);
+		addAttachListener(attachEvent -> {
+			getUI().addStyleName("valo-menu-responsive");
+			if (getMenuTitle() == null) {
+				setMenuTitle(detectMenuTitle());
+			}
+			Navigator navigator = UI.getCurrent().getNavigator();
+			if (navigator != null) {
+				String state = navigator.getState();
+				if (state == null) {
+					state = "";
+				}
+				Button b = nameToButton.get(state);
+				if (b != null) {
+					emphasisAsSelected(b);
+				}
+			}
+
+		});
 	}
 
 	protected void createHeader() {
@@ -162,14 +144,7 @@ public class ViewMenu extends CssLayout {
 
 	private Component[] getAsLinkButtons(List<Bean<?>> availableViews) {
 
-		Collections.sort(availableViews, new Comparator<Bean<?>>() {
-
-			@Override
-			public int compare(Bean<?> o1, Bean<?> o2) {
-				return 0;
-			}
-		});
-
+		Collections.sort(availableViews, (o1, o2) ->0);
 		ArrayList<Button> buttons = new ArrayList<>();
 		for (Bean<?> viewBean : availableViews) {
 
@@ -191,7 +166,6 @@ public class ViewMenu extends CssLayout {
 				if (CDIView.USE_CONVENTIONS.equals(viewId)) {
 					viewId = Conventions.deriveMappingForView(beanClass);
 				}
-
 				nameToButton.put(viewId, button);
 				buttons.add(button);
 			}
@@ -204,12 +178,7 @@ public class ViewMenu extends CssLayout {
 		final MButton button = new MButton(getNameFor(beanClass));
 		button.setPrimaryStyleName("valo-menu-item");
 		button.setIcon(getIconFor(beanClass));
-		button.addClickListener(new ClickListener() {
-			@Override
-			public void buttonClick(ClickEvent event) {
-				navigateTo(beanClass);
-			}
-		});
+		button.addClickListener(clickEvent -> navigateTo(beanClass));
 		return button;
 	}
 
@@ -291,12 +260,15 @@ public class ViewMenu extends CssLayout {
 			final MutableObject<View> view = new MutableObject<>();
 
 			ViewChangeListener l = new ViewChangeListener() {
-
 				@Override
-				public boolean beforeViewChange(
-						ViewChangeListener.ViewChangeEvent event) {
+				public boolean beforeViewChange(ViewChangeListener.ViewChangeEvent event) {
+				    if (event.getOldView().equals("login") && !accessControl.isUserSignedIn()) {
+					    Notification.show("User not signed", "Please sign in", Notification.Type.TRAY_NOTIFICATION);
+					    return false;
+					}
 					return true;
 				}
+
 
 				@Override
 				public void afterViewChange(
