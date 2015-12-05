@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @CDIView(value = "request-list", supportsParameters = true)
-@ViewMenuItem(icon = FontAwesome.LIST, title = "My requests", order = 2)
+@ViewMenuItem(icon = FontAwesome.LIST, title = "Requests", order = 2)
 public class RequestListView extends MVerticalLayout implements View {
 
 	@Inject

@@ -1,6 +1,5 @@
 package com.ibm.lnw.presentation.model;
 
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -9,6 +8,7 @@ import com.ibm.lnw.backend.domain.Request;
 import com.sendgrid.SendGrid;
 import com.sendgrid.SendGridException;
 
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.Set;
 
@@ -20,7 +20,30 @@ public class SendGridService {
 	private static String userName;
 	private static String password;
 
-
+	public static void sendResetLink(String userToReset) throws Exception {
+		VCAPParser();
+		if(userName == null || password == null) {
+			throw new Exception("VCAP was not parsed correctly");
+		}
+		SendGrid sendGrid = new SendGrid(userName, password);
+		SendGrid.Email email = new SendGrid.Email();
+		email.addTo(userToReset);
+		email.setFrom("lnwtool@sk.ibm.com");
+		email.setSubject("Link to reset password to LNW Tool");
+		String hash = MD5Hash.encrypt(LocalDate.now().toString()) + "id=" + MD5Hash.encrypt(userToReset);
+		System.out.println(hash);
+		email.setHtml("<body><p><h4>If you did not request to reset password to LNW Tool, please ignore this " +
+				"email</h4></p>" +
+				"<p><a href=\"http://lnwtool.eu-gb.mybluemix.net/?pwd_reset="
+				+ hash + "\">Click here to reset your LNW Tool password</a></p><body>");
+		try {
+			SendGrid.Response response = sendGrid.send(email);
+			System.out.println(response.getMessage());
+		}
+		catch (SendGridException ex) {
+			ex.printStackTrace();
+		}
+	}
 
 	public static void sendEmail(Request request) throws Exception {
 		VCAPParser();

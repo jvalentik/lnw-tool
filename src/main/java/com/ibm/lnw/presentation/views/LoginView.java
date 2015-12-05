@@ -123,8 +123,10 @@ public class LoginView extends CustomComponent implements View {
 		Button forgottenPwd = new Button("Forgot passsword?");
 		forgottenPwd.setDescription("Click to reset your password");
 		forgottenPwd.addStyleName(ValoTheme.BUTTON_LINK);
-		forgottenPwd.addClickListener(clickEvent -> Notification.show("Link where you can reset password has been " +
-				"sent to your email", Notification.Type.HUMANIZED_MESSAGE));
+		forgottenPwd.addClickListener(clickEvent ->  {
+			ResetPassword dialog = new ResetPassword(userService);
+			UI.getCurrent().addWindow(dialog);
+		});
 		buttons.addComponent(forgottenPwd);
 		return layout;
 	}
@@ -151,7 +153,6 @@ public class LoginView extends CustomComponent implements View {
 					System.out.println("Navigating to: " + "request-list/?request_id=" + params.split("=")[1]);
 					Navigator navigator = UI.getCurrent().getNavigator();
 					navigator.navigateTo("request-list/?request_id=2");
-					//AppUI.getMenu().navigateTo("request-list/?request_id=" + params.split("=")[1]);
 				}
 				else {
 					AppUI.getMenu().navigateTo("main-form");
