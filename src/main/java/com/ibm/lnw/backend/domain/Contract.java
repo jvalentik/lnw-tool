@@ -24,6 +24,7 @@ public class Contract {
 
 
 	public void findContractByWBS(String wbsId) throws Exception {
+		System.out.println("Looking for: " + wbsId);
 		Connection con = null;
 		Statement stmt = null;
 		ResultSet rs = null;

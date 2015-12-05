@@ -4,7 +4,6 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -35,6 +34,7 @@ public class Request implements Serializable {
 	private String contractNumber;
 
 	private String services;
+	@NotNull
 	private String pmaName;
 	private String pexName;
 	private String comments;
@@ -44,7 +44,6 @@ public class Request implements Serializable {
 
 	public Request() {
 		customerName = contractNumber = services = pmaName = pexName = comments = submitterUserName = leadingWBS ="";
-		SimpleDateFormat format = new SimpleDateFormat("dd/mm/yyy");
 		dateTimeStamp = new Date();
 		status = RequestStatus.OPEN;
 	}
