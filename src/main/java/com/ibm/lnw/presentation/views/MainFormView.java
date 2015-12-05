@@ -181,7 +181,7 @@ public class MainFormView extends CustomComponent implements View {
 	private void submitRequest() {
 		try {
 			group.commit();
-			request.setStatus(RequestStatus.Pending);
+			request.setStatus(RequestStatus.OPEN);
 			int requestId = requestService.persist(request);
 			fileContainer.forEach((v, k) -> {
 				k.forEach((l, m) -> {

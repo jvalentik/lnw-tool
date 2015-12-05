@@ -5,12 +5,5 @@
         <class>com.ibm.lnw.backend.domain.User</class>
         <class>com.ibm.lnw.backend.domain.Request</class>
         <class>com.ibm.lnw.backend.domain.Attachment</class>
-        <properties>
-            <property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>
-            <!-- This is needed until jpa 2.1 support in bluemix -->
-            <property name="openjpa.jdbc.SynchronizeMappings" value="buildSchema"/>
-            <property name="openjpa.TransactionMode" value="managed"/>
-            <property name="openjpa.ConnectionFactoryMode" value="managed"/>
-        </properties>
     </persistence-unit>
 </persistence>

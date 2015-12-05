@@ -40,4 +40,9 @@ public class RequestService {
 				.setParameter("filter1", filter1).setParameter("filter2", filter2).getResultList();
 
 	}
+
+	public List<Request> findByID(int id) {
+		return entityManager.createNamedQuery("Request.findByID", Request.class).setParameter("filter", id)
+				.getResultList();
+	}
 }

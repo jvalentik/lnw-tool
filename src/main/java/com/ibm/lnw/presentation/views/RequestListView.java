@@ -24,17 +24,14 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.List;
 
-/**
- * A view that lists Customers in a Table and lets user to choose one for
- * editing. There is also RIA features like on the fly filtering.
- */
-@CDIView("request-list")
+@CDIView(value = "request-list", supportsParameters = true)
 @ViewMenuItem(icon = FontAwesome.LIST, title = "My requests", order = 2)
 public class RequestListView extends MVerticalLayout implements View {
 
 	@Inject
-	private RequestService service;
+	private RequestService requestService;
 
 	@Inject
 	private CustomAccessControl accessControl;
@@ -42,7 +39,6 @@ public class RequestListView extends MVerticalLayout implements View {
 	@Inject
 	private RequestForm requestForm;
 
-	// Introduce and configure some UI components used on this view
 	MTable<Request> requestMTable = new MTable(Request.class).withFullWidth().
 			withFullHeight();
 
@@ -52,8 +48,6 @@ public class RequestListView extends MVerticalLayout implements View {
 	TextField filter = new TextField();
 
 	Header header = new Header("Customers").setHeaderLevel(2);
-
-	//Button addButton = new MButton(FontAwesome.EDIT, (clickEvent) -> addRequest());
 
 	@PostConstruct
 	public void init() {
@@ -117,13 +111,13 @@ public class RequestListView extends MVerticalLayout implements View {
 
 	private void listRequests(String ... filter) {
 		if (filter == null) {
-			requestMTable.setBeans(new ArrayList<>(service.findAll()));
+			requestMTable.setBeans(new ArrayList<>(requestService.findAll()));
 		}
 		else if (filter.length == 1) {
-			requestMTable.setBeans(new ArrayList<>(service.findAllByUser(filter[0])));
+			requestMTable.setBeans(new ArrayList<>(requestService.findAllByUser(filter[0])));
 		}
 		else {
-			requestMTable.setBeans(new ArrayList<>(service.findAllByUserAndFilter(filter[0], filter[1])));
+			requestMTable.setBeans(new ArrayList<>(requestService.findAllByUserAndFilter(filter[0], filter[1])));
 		}
 	}
 
@@ -133,10 +127,6 @@ public class RequestListView extends MVerticalLayout implements View {
 		} else {
 			closeEditor();
 		}
-	}
-
-	void addRequest() {
-		openEditor(new Request());
 	}
 
 	private void openEditor(Request request) {
@@ -162,8 +152,23 @@ public class RequestListView extends MVerticalLayout implements View {
 		closeEditor();
 	}
 
+
 	@Override
 	public void enter(ViewChangeListener.ViewChangeEvent event) {
+		System.out.println("Entered request-list view");
+		AppUI.getMenu().setVisible(true);
+		if (event.getParameters().contains("?request_id=")) {
+			List<Request> foundRequests = requestService.findByID(Integer.parseInt(event.getParameters().split("=")[1]));
+			if (!foundRequests.isEmpty() && foundRequests.get(0).getSubmitterUserName().equals(accessControl.getPrincipalName())) {
+				editRequest(foundRequests.get(0));
+			}
+			else {
+				Notification.show("Request not found", "The request you were trying to open is inaccessible to you",
+						Notification.Type.WARNING_MESSAGE);
+				AppUI.getMenu().navigateTo("login");
+			}
+
+		}
 		if (!accessControl.isUserSignedIn()) {
 			AppUI.getMenu().navigateTo("");
 			Notification.show("User not signed", "Please sign in", Notification.Type.TRAY_NOTIFICATION);

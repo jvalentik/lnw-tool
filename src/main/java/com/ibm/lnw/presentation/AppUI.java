@@ -14,7 +14,6 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 
 import javax.inject.Inject;
-import java.util.stream.Stream;
 
 @CDIUI("")
 @Theme("mytheme")
@@ -30,7 +29,8 @@ public class AppUI extends UI {
 
     @Override
     protected void init(VaadinRequest request) {
-        Stream.of(request.getAttributeNames()).forEach(System.out::println);
+        System.out.println("Attribute: " + request.getAttribute("request_id"));
+	    System.out.println("Parameter" + request.getParameter("request_id"));
         Navigator navigator = new Navigator(this, viewMenuLayout.
                 getMainContent()) {
 
@@ -46,7 +46,14 @@ public class AppUI extends UI {
         };
         navigator.addProvider(viewProvider);
         setContent(viewMenuLayout);
-        navigator.navigateTo("login");
+        if (request.getParameter("request_id") == null) {
+	        System.out.println("Navigating to login: no param");
+	        navigator.navigateTo("login");
+        }
+	    else {
+	        System.out.println("Navigating to login: param " + request.getParameter("request_id"));
+	        navigator.navigateTo("login/?request_id=" + request.getParameter("request_id"));
+        }
     }
 
     public ViewMenuLayout getViewMenuLayout() {

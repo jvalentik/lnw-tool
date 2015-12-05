@@ -9,6 +9,7 @@ import com.ibm.lnw.presentation.model.MD5Hash;
 import com.ibm.lnw.presentation.model.UserInfo;
 import com.vaadin.cdi.CDIView;
 import com.vaadin.event.ShortcutAction;
+import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
@@ -33,6 +34,7 @@ public class LoginView extends CustomComponent implements View {
 	private TextField username;
 	private PasswordField password;
 	private Button login;
+	private String params;
 
 	@Inject
 	private UserService userService;
@@ -43,10 +45,10 @@ public class LoginView extends CustomComponent implements View {
 	@Inject
 	private CustomAccessControl accessControl;
 
-
 	public void enter(ViewChangeListener.ViewChangeEvent event) {
 		AppUI.getMenu().setVisible(false);
-		System.out.println("LoginView Params: " + event.getParameters() );
+		params = event.getParameters();
+		System.out.println("View Param: " + params);
 		if (accessControl.isUserSignedIn()) {
 			Notification.show("Log out", "You have been logged out", Notification.Type.TRAY_NOTIFICATION);
 		}
@@ -128,6 +130,7 @@ public class LoginView extends CustomComponent implements View {
 	}
 
 	private void login() {
+		System.out.println("View param in login: " + params);
 		User currentUser = new User();
 		currentUser.setUserName(username.getValue().toLowerCase().trim());
 		try {
@@ -136,19 +139,23 @@ public class LoginView extends CustomComponent implements View {
 			nx.printStackTrace();
 			throw new RuntimeException("Failed to encrypt password");
 		}
-		currentUser.setRole(UserRole.Sender);
+		currentUser.setRole(UserRole.INITIATOR);
 		this.currentUser.setUser(currentUser);
 		List<User> userList = userService.findByName(currentUser.getUserName());
-		System.out.println("Size: " + userList.size());
-		System.out.println(currentUser);
 		if (!userList.isEmpty()) {
-			userList.forEach(System.out::println);
 			User tempUser = userList.get(0);
-			if (tempUser != null && currentUser.equals(tempUser)) {
-				System.out.println(currentUser);
-				System.out.println(tempUser);
+			if (currentUser.equals(tempUser)) {
 				this.currentUser.setUser(tempUser);
-				AppUI.getMenu().navigateTo("main-form");
+				System.out.println("User found");
+				if (params.contains("?request_id=")) {
+					System.out.println("Navigating to: " + "request-list/?request_id=" + params.split("=")[1]);
+					Navigator navigator = UI.getCurrent().getNavigator();
+					navigator.navigateTo("request-list/?request_id=2");
+					//AppUI.getMenu().navigateTo("request-list/?request_id=" + params.split("=")[1]);
+				}
+				else {
+					AppUI.getMenu().navigateTo("main-form");
+				}
 			} else {
 				this.currentUser.setUser(null);
 				Notification notification = new Notification("Login failed", "Please check your username and password and" +

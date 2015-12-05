@@ -40,7 +40,7 @@ public class User implements Serializable {
 
 	public User() {
 		password = lastName = firstName = userName = "";
-		userRole = UserRole.Undefined;
+		userRole = UserRole.INITIATOR;
 	}
 
 	@Override

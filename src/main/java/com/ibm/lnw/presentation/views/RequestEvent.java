@@ -17,7 +17,7 @@ public @interface RequestEvent {
 	Type value();
 
 	enum Type {
-		EDIT
+		EDIT, OPEN
 	}
 }
 

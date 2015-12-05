@@ -56,7 +56,7 @@ public class RequestForm extends AbstractForm<Request> {
 											    comments,
 			                                    status,
 											    dateTimeStamp);
-	    if (accessControl.isUserInRole(UserRole.Sender.toString())) {
+	    if (accessControl.isUserInRole(UserRole.INITIATOR.toString())) {
 		    formLayout.setEnabled(false);
 	    }
 	    button.addClickListener(clickEvent -> editEvent.fire(getEntity()));

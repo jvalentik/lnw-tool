@@ -32,11 +32,16 @@ public class SendGridService {
 		SendGrid.Email email = new SendGrid.Email();
 		email.addTo(request.getSubmitterUserName());
 		email.setFrom("lnwtool@sk.ibm.com");
-		email.setSubject("New request submitted: " + request.getLeadingWBS() + "Customer: " + request.getCustomerName
-				() + " by " + request.getSubmitterUserName());
-
-		email.setHtml("<a href=\"http://lnwtool.eu-gb.mybluemix.net/#!" + request.getId() + "\">Click to open " +
-				"request");		try {
+		email.setSubject(request.getSubmitterUserName() + " sent you a new request in the LNW Tool");
+		email.setHtml("<body><p>There is a new request for you in the LNW Tool --> " +
+				"<a href=\"http://lnwtool.eu-gb.mybluemix.net/?request_id=" + request.getId() + "\">Link to this request</a></p>" +
+				"<a href=\"http://lnwtool.eu-gb.mybluemix.net\">Link to LNW Tool</a>" +
+				"<p><h4>Request details</h4></p>" +
+				"<p>Customer: " + request.getCustomerName() + "</p>" +
+				"<p>Contract no.: " + request.getContractNumber() + "</p>" +
+				"<p>OCPS: " + request.getServices() + "</p>" +
+				"<p>PE: " + request.getPexName() + "</p></body>");
+		try {
 			SendGrid.Response response = sendGrid.send(email);
 			System.out.println(response.getMessage());
 		}

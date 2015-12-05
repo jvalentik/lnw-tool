@@ -16,7 +16,9 @@ import java.util.Date;
 		@NamedQuery(name="Request.findAllByUser",
 					query="SELECT r FROM Request r WHERE r.submitterUserName=:filter"),
 		@NamedQuery(name="Request.findAllByUserAndFilter",
-					query = "SELECT r FROM Request r WHERE r.submitterUserName=:filter1 AND (LOWER(r.leadingWBS) LIKE :filter2 OR LOWER(r.customerName) LIKE :filter2)")
+					query = "SELECT r FROM Request r WHERE r.submitterUserName=:filter1 AND (LOWER(r.leadingWBS) LIKE" +
+							" :filter2 OR LOWER(r.customerName) LIKE :filter2)"),
+		@NamedQuery(name="Request.findByID", query = "SELECT r FROM Request r WHERE r.id=:filter")
 })
 @Entity
 public class Request implements Serializable {
@@ -44,7 +46,7 @@ public class Request implements Serializable {
 		customerName = contractNumber = services = pmaName = pexName = comments = submitterUserName = leadingWBS ="";
 		SimpleDateFormat format = new SimpleDateFormat("dd/mm/yyy");
 		dateTimeStamp = new Date();
-		status = RequestStatus.Pending;
+		status = RequestStatus.OPEN;
 	}
 
 		public String getSubmitterUserName() {
