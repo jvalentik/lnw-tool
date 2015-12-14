@@ -3,11 +3,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>net.bluemix</groupId>
-    <artifactId>vaadin-jpa-application</artifactId>
+    <groupId>com.ibm.bluemix</groupId>
+    <artifactId>lnw-tool</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>war</packaging>
-    <name>vaadin-jpa-application</name>
+    <name>lnw-tool</name>
   
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
