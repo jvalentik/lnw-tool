@@ -155,7 +155,7 @@ public class LoginView extends CustomComponent implements View {
 					navigator.navigateTo("request-list/?request_id=" + params.split("=")[1]);
 				}
 				else {
-					AppUI.getMenu().navigateTo("main-form");
+					AppUI.getMenu().navigateTo("submitter-view");
 				}
 			} else {
 				this.currentUser.setUser(null);

@@ -39,10 +39,7 @@ public class AppUI extends UI {
 
     @Override
     protected void init(VaadinRequest request) {
-        System.out.println("Attribute: " + request.getAttribute("request_id"));
-	    System.out.println("Parameter" + request.getParameter("request_id"));
-        Navigator navigator = new Navigator(this, viewMenuLayout.
-                getMainContent()) {
+       Navigator navigator = new Navigator(this, viewMenuLayout.getMainContent()) {
 
             @Override
             public void navigateTo(String navigationState) {
@@ -57,9 +54,6 @@ public class AppUI extends UI {
         navigator.addProvider(viewProvider);
         setContent(viewMenuLayout);
 	    if (request.getParameter("pwd_reset") != null) {
-		    System.out.println("Reset param: " + request.getParameter("pwd_reset"));
-		    System.out.println("Part 1: " + request.getParameter("pwd_reset").split("id=")[0]);
-		    System.out.println("Part 2: " + request.getParameter("pwd_reset").split("id=")[1]);
 		    try {
 		        if (request.getParameter("pwd_reset").split("id=")[0].equals(MD5Hash.encrypt(LocalDate.now().toString()))) {
 				    System.out.println("Date Validation passed");

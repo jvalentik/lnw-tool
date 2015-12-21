@@ -50,10 +50,9 @@ public class SendGridService {
 		if(userName == null || password == null) {
 			throw new Exception("VCAP was not parsed correctly");
 		}
-
 		SendGrid sendGrid = new SendGrid(userName, password);
 		SendGrid.Email email = new SendGrid.Email();
-		email.addTo(request.getSubmitterUserName());
+		email.addTo(request.getPmaName());
 		email.setFrom("lnwtool@sk.ibm.com");
 		email.setSubject(request.getSubmitterUserName() + " sent you a new request in the LNW Tool");
 		email.setHtml("<body><p>There is a new request for you in the LNW Tool --> " +

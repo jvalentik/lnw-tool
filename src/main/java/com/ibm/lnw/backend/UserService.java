@@ -27,7 +27,6 @@ public class UserService {
 
 	public void deleteEntity(User entity) {
 		if (entity.getId() > 0) {
-			// reattach to remove
 			entity = entityManager.merge(entity);
 			entityManager.remove(entity);
 		}

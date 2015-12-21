@@ -1,6 +1,5 @@
 package com.ibm.lnw.presentation.views;
 
-import com.ibm.lnw.backend.RequestService;
 import com.ibm.lnw.backend.domain.Request;
 import com.ibm.lnw.backend.domain.RequestStatus;
 import com.ibm.lnw.backend.domain.UserRole;
@@ -16,10 +15,6 @@ import javax.inject.Inject;
 
 @Dependent
 public class RequestForm extends AbstractForm<Request> {
-
-    @Inject
-    RequestService service;
-
 	@Inject
 	CustomAccessControl accessControl;
 
