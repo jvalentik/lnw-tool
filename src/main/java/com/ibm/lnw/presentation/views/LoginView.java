@@ -152,7 +152,7 @@ public class LoginView extends CustomComponent implements View {
 				if (params.contains("?request_id=")) {
 					System.out.println("Navigating to: " + "request-list/?request_id=" + params.split("=")[1]);
 					Navigator navigator = UI.getCurrent().getNavigator();
-					navigator.navigateTo("request-list/?request_id=2");
+					navigator.navigateTo("request-list/?request_id=" + params.split("=")[1]);
 				}
 				else {
 					AppUI.getMenu().navigateTo("main-form");

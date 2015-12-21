@@ -33,9 +33,9 @@ import java.util.List;
 /**
  * Created by Jan Valentik on 11/15/2015.
  */
-@CDIView("main-form")
+@CDIView("submitter-view")
 @ViewMenuItem(icon = FontAwesome.ENVELOPE, title = "New request", order = ViewMenuItem.BEGINNING)
-public class MainFormView extends CustomComponent implements View {
+public class SubmitterView extends CustomComponent implements View {
 	private Table table;
 	private FieldGroup group;
 	private Request request;

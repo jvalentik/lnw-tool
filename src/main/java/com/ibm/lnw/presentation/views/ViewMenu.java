@@ -3,10 +3,10 @@ package com.ibm.lnw.presentation.views;
 /**
  * Created by Jan Valentik on 12/2/2015.
  */
+import com.ibm.lnw.presentation.model.CustomAccessControl;
 import com.vaadin.annotations.Title;
 import com.vaadin.cdi.CDIView;
 import com.vaadin.cdi.UIScoped;
-import com.vaadin.cdi.access.AccessControl;
 import com.vaadin.cdi.internal.Conventions;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
@@ -37,7 +37,7 @@ public class ViewMenu extends CssLayout {
 	BeanManager beanManager;
 
 	@Inject
-	AccessControl accessControl;
+	CustomAccessControl accessControl;
 
 
 	private final Header header = new Header(null).setHeaderLevel(3);
@@ -204,11 +204,8 @@ public class ViewMenu extends CssLayout {
 			return annotation.title();
 		}
 		String simpleName = viewType.getSimpleName();
-		// remove trailing view
 		simpleName = simpleName.replaceAll("View$", "");
-		// decamelcase
-		simpleName = StringUtils.join(StringUtils.splitByCharacterTypeCamelCase(
-				simpleName), " ");
+		simpleName = StringUtils.join(StringUtils.splitByCharacterTypeCamelCase(simpleName), " ");
 		return simpleName;
 	}
 

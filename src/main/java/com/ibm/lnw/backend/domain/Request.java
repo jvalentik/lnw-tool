@@ -61,7 +61,7 @@ public class Request implements Serializable {
 	}
 
 	public void setCustomerName(String customerName) {
-		this.customerName = customerName;
+		this.customerName = customerName.trim();
 	}
 
 	public String getContractNumber() {
@@ -69,7 +69,7 @@ public class Request implements Serializable {
 	}
 
 	public void setContractNumber(String contractNumber) {
-		this.contractNumber = contractNumber;
+		this.contractNumber = contractNumber.trim();
 	}
 
 	public String getServices() {
@@ -77,7 +77,7 @@ public class Request implements Serializable {
 	}
 
 	public void setServices(String services) {
-		this.services = services;
+		this.services = services.trim();
 	}
 
 	public String getPmaName() {
@@ -85,7 +85,7 @@ public class Request implements Serializable {
 	}
 
 	public void setPmaName(String pmaName) {
-		this.pmaName = pmaName;
+		this.pmaName = pmaName.trim();
 	}
 
 	public String getPexName() {
@@ -93,7 +93,7 @@ public class Request implements Serializable {
 	}
 
 	public void setPexName(String pexName) {
-		this.pexName = pexName;
+		this.pexName = pexName.trim();
 	}
 
 	public String getComments() {
@@ -101,7 +101,7 @@ public class Request implements Serializable {
 	}
 
 	public void setComments(String comments) {
-		this.comments = comments;
+		this.comments = comments.trim();
 	}
 
 	public Date getDateTimeStamp() {
@@ -113,7 +113,7 @@ public class Request implements Serializable {
 	}
 
 	public void setLeadingWBS(String leadingWBS) {
-		this.leadingWBS = leadingWBS;
+		this.leadingWBS = leadingWBS.trim();
 	}
 
 	public int getId() {
