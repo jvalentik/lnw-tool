@@ -30,7 +30,7 @@ public class ResetPassword extends Window {
 		});
 
 		okButton.addClickListener(clickEvent -> {
-			List<User> users = userService.findByName(userName.getValue());
+			List<User> users = userService.findByUserName(userName.getValue());
 			if (!users.isEmpty()) {
 				try {
 					SendGridService.sendResetLink(userName.getValue());

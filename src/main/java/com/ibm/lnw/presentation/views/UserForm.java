@@ -5,6 +5,8 @@ import com.ibm.lnw.backend.domain.User;
 import com.ibm.lnw.backend.domain.UserRole;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
+import org.vaadin.viritin.fields.MPasswordField;
+import org.vaadin.viritin.fields.MTextField;
 import org.vaadin.viritin.fields.TypedSelect;
 import org.vaadin.viritin.form.AbstractForm;
 import org.vaadin.viritin.label.Header;
@@ -36,10 +38,11 @@ public class UserForm extends AbstractForm<User> {
 	@UserEvent(UserEvent.Type.DELETE)
 	javax.enterprise.event.Event<User> deleteEvent;
 
-	TextField firstName = new TextField("First name");
-	TextField lastName = new TextField("Last name");
-	TextField userName = new TextField("Intranet ID");
-	TypedSelect<UserRole> status = new TypedSelect().withCaption("Type of access");
+	TextField firstName = new MTextField("First name");
+	TextField lastName = new MTextField("Last name");
+	TextField userName = new MTextField("Intranet ID");
+    PasswordField password = new MPasswordField("Password");
+	TypedSelect<UserRole> userRole = new TypedSelect().withCaption("Type of access");
 
 
 
@@ -47,18 +50,19 @@ public class UserForm extends AbstractForm<User> {
 	protected Component createContent() {
 		setStyleName(ValoTheme.LAYOUT_CARD);
 		return new MVerticalLayout(new Header("Edit user...").setHeaderLevel(3),
-				new MFormLayout(firstName, lastName, userName, status).withFullWidth(), getToolbar()).withStyleName
+				new MFormLayout(firstName, lastName, userName, password, userRole).withFullWidth(), getToolbar())
+                .withStyleName
 				(ValoTheme.LAYOUT_CARD);
 	}
 
 	@PostConstruct
 	void init() {
 		setEagerValidation(true);
-		status.setWidthUndefined();
-		status.setOptions(UserRole.values());
+		userRole.setWidthUndefined();
+		userRole.setOptions(UserRole.values());
 		setSavedHandler(user -> {
 				try {
-					userService.saveOrPersist(user);
+                    userService.saveOrPersist(user);
 					saveEvent.fire(user);
 				}
 				catch (EJBException ex) {
@@ -78,6 +82,5 @@ public class UserForm extends AbstractForm<User> {
 	protected void adjustResetButtonState() {
 		getResetButton().setEnabled(true);
 		getDeleteButton().setEnabled(getEntity() != null && getEntity().isPersisted());
-
 	}
 }

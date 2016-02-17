@@ -17,7 +17,9 @@ import java.util.Date;
 		@NamedQuery(name="Request.findAllByUserAndFilter",
 					query = "SELECT r FROM Request r WHERE r.submitterUserName=:filter1 AND (LOWER(r.leadingWBS) LIKE" +
 							" :filter2 OR LOWER(r.customerName) LIKE :filter2)"),
-		@NamedQuery(name="Request.findByID", query = "SELECT r FROM Request r WHERE r.id=:filter")
+		@NamedQuery(name="Request.findByID", query = "SELECT r FROM Request r WHERE r.id=:filter"),
+        @NamedQuery(name="Request.findByFilter", query = "SELECT r FROM Request r WHERE LOWER(r.leadingWBS) LIKE " +
+                ":filter OR LOWER(r.customerName) LIKE :filter")
 })
 @Entity
 public class Request implements Serializable {
@@ -39,16 +41,18 @@ public class Request implements Serializable {
 	private String pexName;
 	private String comments;
 	private String submitterUserName;
+
+    @Temporal(TemporalType.DATE)
 	private Date dateTimeStamp;
 	private RequestStatus status;
 
 	public Request() {
 		customerName = contractNumber = services = pmaName = pexName = comments = submitterUserName = leadingWBS ="";
 		dateTimeStamp = new Date();
-		status = RequestStatus.OPEN;
+		status = RequestStatus.Open;
 	}
 
-		public String getSubmitterUserName() {
+    public String getSubmitterUserName() {
 		return submitterUserName;
 	}
 
@@ -120,7 +124,15 @@ public class Request implements Serializable {
 		return id;
 	}
 
-	public RequestStatus getStatus() {
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setDateTimeStamp(Date dateTimeStamp) {
+        this.dateTimeStamp = dateTimeStamp;
+    }
+
+    public RequestStatus getStatus() {
 		return status;
 	}
 

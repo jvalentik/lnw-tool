@@ -5,13 +5,14 @@ import com.ibm.lnw.backend.domain.User;
 import com.ibm.lnw.presentation.AppUI;
 import com.ibm.lnw.presentation.model.CustomAccessControl;
 import com.vaadin.cdi.CDIView;
+import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.UI;
+import com.vaadin.ui.*;
+import org.vaadin.viritin.button.MButton;
 import org.vaadin.viritin.fields.MTable;
 import org.vaadin.viritin.label.Header;
 import org.vaadin.viritin.layouts.MHorizontalLayout;
@@ -40,20 +41,26 @@ public class AdminView extends MVerticalLayout implements View {
 	MTable<User> userMTable = new MTable(User.class).withFullWidth().withFullHeight();
 	MHorizontalLayout mainContent = new MHorizontalLayout(userMTable).withFullWidth().withMargin(false);
 	Header header = new Header("Users").setHeaderLevel(2);
+    TextField filter = new TextField();
+    Button addButton = new MButton(FontAwesome.EDIT, clickEvent -> addUser());
 
 	@Override
 	public void enter(ViewChangeListener.ViewChangeEvent viewChangeEvent) {
-		/*if (!accessControl.isUserInRole("ADMINISTRATOR")) {
-			Notification.show("You are not entitled to access this view", Notification.Type.WARNING_MESSAGE);
+        System.out.println("In adminView.enter()");
+		if (!accessControl.isUserInRole("Administrator")) {
+			Notification.show("You do not have access to perform this operation", Notification.Type.WARNING_MESSAGE);
 			Navigator navigator = UI.getCurrent().getNavigator();
-			navigator.navigateTo("login");
-		}   */
+			navigator.navigateTo("request-list");
+		}
 
 	}
 
 	@PostConstruct
 	public void init() {
+        System.out.println("AdminView init");
 		userMTable.addMValueChangeListener(mValueChangeEvent -> editUser(mValueChangeEvent.getValue()));
+        filter.setInputPrompt("Filter users...");
+        filter.addTextChangeListener(textChangeEvent -> listUsers(textChangeEvent.getText()));
 		layout();
 		adjustTableColumns();
 		UI.getCurrent().setResizeLazy(true);
@@ -66,14 +73,14 @@ public class AdminView extends MVerticalLayout implements View {
 
 	private void layout() {
 		removeAllComponents();
-		addComponents(new MHorizontalLayout(header).expand(header).alignAll(Alignment.MIDDLE_LEFT),
+		addComponents(new MHorizontalLayout(header, filter, addButton).expand(header).alignAll(Alignment.MIDDLE_LEFT),
 				mainContent);
 		setMargin(new MarginInfo(false, true, true, true));
 		expand(mainContent);
 	}
 
 	private void adjustTableColumns() {
-		userMTable.setVisibleColumns(new Object[]{"firstName", "lastName", "role"});
+		userMTable.setVisibleColumns(new Object[]{"firstName", "lastName", "userRole"});
 		userMTable.setColumnHeaders(new String[]{"First name", "Last name", "Type of access"});
 	}
 
@@ -81,13 +88,22 @@ public class AdminView extends MVerticalLayout implements View {
 		userMTable.setBeans(new ArrayList<>(userService.findAll()));
 	}
 
+    private void listUsers(String filterString) {
+        userMTable.setBeans(new ArrayList<>(userService.findByName(filterString)));
+    }
+
 	void editUser(User user) {
 		if (user != null) {
+            System.out.println("Editing user: " + user);
 			openEditor(user);
 		} else {
 			closeEditor();
 		}
 	}
+
+    void addUser() {
+        openEditor(new User());
+    }
 
 	private void openEditor(User user) {
 		userForm.setEntity(user);
@@ -103,8 +119,18 @@ public class AdminView extends MVerticalLayout implements View {
 		}
 	}
 
-	void saveCustomer(@Observes @UserEvent(UserEvent.Type.EDIT) User user) {
+	void saveUser(@Observes @UserEvent(UserEvent.Type.SAVE) User user) {
 		listUsers();
 		closeEditor();
 	}
+
+    void resetUser(@Observes @UserEvent(UserEvent.Type.REFRESH) User user) {
+        listUsers();
+        closeEditor();
+    }
+
+    void deleteUser(@Observes @UserEvent(UserEvent.Type.DELETE) User user) {
+        closeEditor();
+        listUsers();
+    }
 }

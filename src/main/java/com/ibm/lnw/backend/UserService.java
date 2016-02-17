@@ -44,6 +44,11 @@ public class UserService {
 				User.class)
 				.setParameter("filter", filter).getResultList();
 	}
+
+    public List<User> findByUserName(String userName) {
+        return entityManager.createNamedQuery("User.findByUserName", User.class).setParameter("filter", userName)
+                .getResultList();
+    }
 }
 
 

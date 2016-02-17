@@ -1,6 +1,7 @@
 package com.ibm.lnw.backend;
 
 import com.ibm.lnw.backend.domain.Request;
+
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -17,8 +18,13 @@ public class RequestService {
 	@PersistenceContext(unitName = "application-pu")
 	private EntityManager entityManager;
 
-	public int persist(Request entity) {
-		entityManager.persist(entity);
+	public int saveOrPersist(Request entity) {
+        if (entity.getId() > 0) {
+            entityManager.merge(entity);
+        }
+        else {
+            entityManager.persist(entity);
+        }
 		entityManager.flush();
 		return entity.getId();
 	}
@@ -37,7 +43,7 @@ public class RequestService {
 
 	public List<Request> findAllByUserAndFilter(String filter1, String filter2) {
 		return entityManager.createNamedQuery("Request.findAllByUserAndFilter", Request.class)
-				.setParameter("filter1", filter1).setParameter("filter2", filter2).getResultList();
+				.setParameter("filter1", filter1.toLowerCase()).setParameter("filter2", filter2.toLowerCase()).getResultList();
 
 	}
 
@@ -45,4 +51,9 @@ public class RequestService {
 		return entityManager.createNamedQuery("Request.findByID", Request.class).setParameter("filter", id)
 				.getResultList();
 	}
+
+    public List<Request> findByFilter(String filter) {
+        return entityManager.createNamedQuery("Request.findByFilter", Request.class).setParameter("filter", filter)
+                .getResultList();
+    }
 }

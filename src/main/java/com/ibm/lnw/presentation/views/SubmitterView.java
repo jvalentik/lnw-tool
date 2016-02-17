@@ -15,6 +15,7 @@ import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.validator.BeanValidator;
 import com.vaadin.data.validator.StringLengthValidator;
+import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
@@ -56,10 +57,12 @@ public class SubmitterView extends CustomComponent implements View {
 
 
 	public void enter(ViewChangeListener.ViewChangeEvent viewChangeEvent) {
-		if (viewChangeEvent.getOldView().equals("login")) {
-				Notification.show("Welcome " + accessControl.getFirstName(),
-						"Start by typing in WBS", Notification.Type.TRAY_NOTIFICATION);
-		}
+        System.out.println("In adminView.enter()");
+        if (!accessControl.isUserInRole("Initiator")) {
+            Notification.show("You do not have access to perform this operation", Notification.Type.WARNING_MESSAGE);
+            Navigator navigator = UI.getCurrent().getNavigator();
+            navigator.navigateTo("request-list");
+        }
 	}
 
 	@PostConstruct
@@ -210,8 +213,8 @@ public class SubmitterView extends CustomComponent implements View {
 	private void submitRequest() {
 		try {
 			group.commit();
-			request.setStatus(RequestStatus.OPEN);
-			int requestId = requestService.persist(request);
+			request.setStatus(RequestStatus.Open);
+			int requestId = requestService.saveOrPersist(request);
 			if (!fileStorage.isEmpty()) {
 				fileStorage.forEach((k, v) -> {
 					byte[] bytes = new byte[(int) v.length()];

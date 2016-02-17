@@ -88,7 +88,7 @@ public class ViewMenu extends CssLayout {
 			}
 		});
 		System.out.println("Views");
-		System.out.println(accessControl.isUserInRole("INITIATOR"));
+		System.out.println(accessControl.isUserInRole("Initiator"));
 		list.forEach(System.out::println);
 		return list;
 	}

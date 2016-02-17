@@ -29,7 +29,7 @@ public class ResetPasswordForm extends Window {
 		okButton.setStyleName(ValoTheme.BUTTON_PRIMARY);
 		okButton.addClickListener(clickEvent -> {
 			if (passwordField.isValid() && passwordField.getValue().equals(repeatPassword.getValue())) {
-				List<User> userList = userService.findByName(userName);
+				List<User> userList = userService.findByUserName(userName);
 				if (!userList.isEmpty()) {
 					try {
 						userList.get(0).setPassword(MD5Hash.encrypt(passwordField.getValue()));

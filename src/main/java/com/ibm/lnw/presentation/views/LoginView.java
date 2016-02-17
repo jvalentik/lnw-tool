@@ -141,9 +141,9 @@ public class LoginView extends CustomComponent implements View {
 			nx.printStackTrace();
 			throw new RuntimeException("Failed to encrypt password");
 		}
-		currentUser.setRole(UserRole.INITIATOR);
+		currentUser.setUserRole(UserRole.Initiator);
 		this.currentUser.setUser(currentUser);
-		List<User> userList = userService.findByName(currentUser.getUserName());
+		List<User> userList = userService.findByUserName(currentUser.getUserName().toLowerCase());
 		if (!userList.isEmpty()) {
 			User tempUser = userList.get(0);
 			if (currentUser.equals(tempUser)) {

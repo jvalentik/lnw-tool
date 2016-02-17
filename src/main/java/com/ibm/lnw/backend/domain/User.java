@@ -13,13 +13,14 @@ import java.io.Serializable;
 @NamedQueries({
 		@NamedQuery(name="User.findAll",
 				query="SELECT u FROM User u"),
+        @NamedQuery(name = "User.findByUserName", query = "SELECT u FROM User u WHERE LOWER(u.userName) LIKE :filter"),
 		@NamedQuery(name="User.findByName",
-				query="SELECT u FROM User u WHERE u.userName LIKE :filter"),
+				query="SELECT u FROM User u WHERE LOWER(u.firstName) LIKE :filter OR LOWER(u.lastName) LIKE :filter"),
 })
 @Entity
 public class User implements Serializable {
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
 	@NotNull(message = "IBM Intranet ID is required")
@@ -40,7 +41,7 @@ public class User implements Serializable {
 
 	public User() {
 		password = lastName = firstName = userName = "";
-		userRole = UserRole.INITIATOR;
+		userRole = UserRole.Initiator;
 	}
 
 	@Override
@@ -51,7 +52,7 @@ public class User implements Serializable {
 		return false;
 	}
 
-	public String getUserName() {
+    public String getUserName() {
 		return userName;
 	}
 
@@ -91,11 +92,11 @@ public class User implements Serializable {
 		this.password = password;
 	}
 
-	public UserRole getRole() {
+	public UserRole getUserRole() {
 		return userRole;
 	}
 
-	public void setRole(UserRole userRole) {
+	public void setUserRole(UserRole userRole) {
 		this.userRole = userRole;
 	}
 

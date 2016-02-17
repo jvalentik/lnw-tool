@@ -69,7 +69,7 @@ public class AddUserView extends Window implements Property.ValueChangeListener{
 						fields.commit();
 						user.setUserName(user.getUserName().toLowerCase().trim());
 						user.setPassword(MD5Hash.encrypt(user.getPassword()));
-						user.setRole(UserRole.INITIATOR);
+						user.setUserRole(UserRole.Initiator);
 						userService.saveOrPersist(user);
 						success = true;
 					}

@@ -8,7 +8,7 @@ import java.io.Serializable;
  */
 @NamedQueries(
 		@NamedQuery(name="Attachment.findAllByFilter",
-				query="SELECT a FROM Attachment a WHERE a.requestId=:filter1 AND a.wbsId LIKE :filter2")
+				query="SELECT a FROM Attachment a WHERE a.requestId=:filter")
 )
 @Entity
 public class Attachment implements Serializable{

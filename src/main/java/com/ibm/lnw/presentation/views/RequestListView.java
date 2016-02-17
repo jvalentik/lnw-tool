@@ -3,7 +3,6 @@ package com.ibm.lnw.presentation.views;
 import com.ibm.lnw.backend.RequestService;
 import com.ibm.lnw.backend.domain.Request;
 import com.ibm.lnw.presentation.AppUI;
-import com.ibm.lnw.presentation.ScreenSize;
 import com.ibm.lnw.presentation.model.CustomAccessControl;
 import com.vaadin.cdi.CDIView;
 import com.vaadin.navigator.View;
@@ -61,65 +60,52 @@ public class RequestListView extends MVerticalLayout implements View {
 			adjustTableColumns();
 			layout();
 		});
-		listRequests(accessControl.getPrincipalName());
+		listRequests();
 	}
 
 	private void layout() {
 		removeAllComponents();
-		if (ScreenSize.getScreenSize() == ScreenSize.LARGE) {
-			addComponents(
-					new MHorizontalLayout(header, filter)
+		addComponents(new MHorizontalLayout(header, filter)
 							.expand(header)
 							.alignAll(Alignment.MIDDLE_LEFT),
 					mainContent
 			);
 			filter.setSizeUndefined();
-		} else {
-			addComponents(
-					header,
-					new MHorizontalLayout(filter)
-							.expand(filter)
-							.alignAll(Alignment.MIDDLE_LEFT),
-					mainContent
-			);
-		}
 		setMargin(new MarginInfo(false, true, true, true));
 		expand(mainContent);
 	}
 
 	private void adjustTableColumns() {
-		if (ScreenSize.getScreenSize() == ScreenSize.LARGE) {
-			requestMTable.setVisibleColumns(new Object[] {"leadingWBS", "customerName", "dateTimeStamp", "status"});
-			requestMTable.setColumnHeaders(new String[] {"WBS", "Customer name", "Submitted on", "Current status"});
-		} else {
-			// Only show one (generated) column with combined first + last name
-			if (requestMTable.getColumnGenerator("WBScustomer") == null) {
-				requestMTable.addGeneratedColumn("WBSCustomer", (table, object1, object2) -> {
-					Request request = (Request) object1;
-					return request.getLeadingWBS() + " " + request.getCustomerName();
-				});
-			}
-			if (ScreenSize.getScreenSize() == ScreenSize.MEDIUM) {
-				requestMTable.setVisibleColumns(new Object[] {"WBSCustomer", "status"});
-				requestMTable.setColumnHeaders("WBS Customer", "Current status");
-			} else {
-				requestMTable.setVisibleColumns(new Object[] {"WBSCustomer"});
-				requestMTable.setColumnHeaders("WBS Customer");
-			}
-		}
+		requestMTable.setVisibleColumns(new Object[] {"leadingWBS", "customerName", "dateTimeStamp", "status"});
+        requestMTable.setColumnHeaders(new String[] {"WBS", "Customer name", "Submitted on", "Current status"});
+
 	}
 
-	private void listRequests(String ... filter) {
-		if (filter == null) {
-			requestMTable.setBeans(new ArrayList<>(requestService.findAll()));
-		}
-		else if (filter.length == 1) {
-			requestMTable.setBeans(new ArrayList<>(requestService.findAllByUser(filter[0])));
-		}
-		else {
-			requestMTable.setBeans(new ArrayList<>(requestService.findAllByUserAndFilter(filter[0], filter[1])));
-		}
-	}
+    private void listRequests() {
+        System.out.println("CurrentUser role INITIATOR: " + accessControl.isUserInRole("Initiator"));
+        System.out.println(accessControl.getPrincipalName());
+        if (accessControl.isUserInRole("Initiator")) {
+            requestMTable.setBeans(new ArrayList<>(requestService.findAllByUser(accessControl.getPrincipalName())));
+        }
+        else {
+            requestMTable.setBeans(new ArrayList<>(requestService.findAll()));
+        }
+    }
+	private void listRequests(String  filter) {
+        if (filter == null || filter.isEmpty()) {
+            listRequests();
+            return;
+        }
+        if (accessControl.isUserInRole("Initiator")) {
+            requestMTable.setBeans(new ArrayList<>(requestService.findAllByUserAndFilter(accessControl
+                    .getPrincipalName(), filter)));
+        }
+        else {
+            requestMTable.setBeans(new ArrayList<>(requestService.findByFilter(filter)));
+        }
+
+    }
+
 
 	void editRequest(Request request) {
 		if (request != null) {
@@ -131,12 +117,8 @@ public class RequestListView extends MVerticalLayout implements View {
 
 	private void openEditor(Request request) {
 		requestForm.setEntity(request);
-		if (ScreenSize.getScreenSize() == ScreenSize.LARGE) {
-			mainContent.addComponent(requestForm);
-			requestForm.focusFirst();
-		} else {
-			AppUI.get().getContentLayout().replaceComponent(this, requestForm);
-		}
+		mainContent.addComponent(requestForm);
+        requestForm.focusFirst();
 	}
 
 	private void closeEditor() {
@@ -147,10 +129,15 @@ public class RequestListView extends MVerticalLayout implements View {
 		}
 	}
 
-	void saveCustomer(@Observes @RequestEvent(RequestEvent.Type.EDIT) Request request) {
-		listRequests(accessControl.getPrincipalName());
+	void saveRequest(@Observes @RequestEvent(RequestEvent.Type.SAVE) Request request) {
+		listRequests();
 		closeEditor();
 	}
+
+    void resetRequest(@Observes @RequestEvent(RequestEvent.Type.REFRESH) Request request) {
+        listRequests();
+        closeEditor();
+    }
 
 
 	@Override

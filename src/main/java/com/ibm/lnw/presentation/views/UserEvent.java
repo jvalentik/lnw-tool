@@ -18,6 +18,6 @@ public @interface UserEvent {
 	Type value();
 
 	enum Type {
-		EDIT, SAVE, REFRESH, DELETE
+		SAVE, REFRESH, DELETE
 	}
 }

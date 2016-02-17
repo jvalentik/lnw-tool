@@ -21,8 +21,8 @@ public class AttachmentService {
 		entityManager.persist(entity);
 	}
 
-	public List<Attachment> findAllByFilters(long filter1, String filter2) {
+	public List<Attachment> findAllByRequestId(long requestId) {
 		return entityManager.createNamedQuery("Attachment.findAllByFilter", Attachment.class).setParameter
-				("filter1", filter1).setParameter("filter2", filter2).getResultList();
+				("filter", requestId).getResultList();
 	}
 }

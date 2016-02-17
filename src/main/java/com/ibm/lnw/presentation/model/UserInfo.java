@@ -24,7 +24,7 @@ public class UserInfo implements Serializable{
 		this.user = user;
 		roles.clear();
 		if (user != null) {
-			roles.add(user.getRole().toString());
+			roles.add(user.getUserRole().toString());
 		}
 	}
 
