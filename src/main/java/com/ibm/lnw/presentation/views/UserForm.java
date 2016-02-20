@@ -3,7 +3,10 @@ package com.ibm.lnw.presentation.views;
 import com.ibm.lnw.backend.UserService;
 import com.ibm.lnw.backend.domain.User;
 import com.ibm.lnw.backend.domain.UserRole;
-import com.vaadin.ui.*;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.PasswordField;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.themes.ValoTheme;
 import org.vaadin.viritin.fields.MPasswordField;
 import org.vaadin.viritin.fields.MTextField;
@@ -43,6 +46,7 @@ public class UserForm extends AbstractForm<User> {
 	TextField userName = new MTextField("Intranet ID");
     PasswordField password = new MPasswordField("Password");
 	TypedSelect<UserRole> userRole = new TypedSelect().withCaption("Type of access");
+    private String initialPassword;
 
 
 
@@ -57,11 +61,15 @@ public class UserForm extends AbstractForm<User> {
 
 	@PostConstruct
 	void init() {
+        initialPassword = getEntity().getPassword();
 		setEagerValidation(true);
 		userRole.setWidthUndefined();
 		userRole.setOptions(UserRole.values());
 		setSavedHandler(user -> {
 				try {
+                    /*if (!MD5Hash.encrypt(password.getValue()).equals(getEntity().getPassword())) {
+                        user.setPassword(MD5Hash.encrypt(password.getValue()));
+                    }*/
                     userService.saveOrPersist(user);
 					saveEvent.fire(user);
 				}
@@ -70,6 +78,8 @@ public class UserForm extends AbstractForm<User> {
 							"discarded", Notification.Type.WARNING_MESSAGE);
 					refreshEvent.fire(user);
 				}
+
+
 		});
 		setResetHandler(user -> refreshEvent.fire(user));
 		setDeleteHandler(user -> {

@@ -46,8 +46,8 @@ public class RequestForm extends AbstractForm<Request> {
 
 	TextField leadingWBS = new MTextField("WBS ID");
     TextField customerName = new MTextField("Last name");
-    TextField contractNumber = new MTextField("Contract number");
-    TextField services = new MTextField("Services");
+    TextField contractNumber = new MTextField("Contract number (OCPS)");
+    TextField services = new MTextField("Services Contract Number");
     TextField pmaName = new MTextField("PMA name");
     TextField pexName = new MTextField("PE Name");
     DateField dateTimeStamp = new MDateField("Submitted on: ");
