@@ -18,7 +18,7 @@ public class RequestService {
 	@PersistenceContext(unitName = "application-pu")
 	private EntityManager entityManager;
 
-	public int saveOrPersist(Request entity) {
+	public Long saveOrPersist(Request entity) {
         if (entity.getId() > 0) {
             entityManager.merge(entity);
         }

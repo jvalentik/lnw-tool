@@ -62,11 +62,11 @@ public class AddUserView extends Window implements Property.ValueChangeListener{
 						Notification.Type.WARNING_MESSAGE);
 			} else {
 				try {
-					if (userService.findByName(((TextField) userName).getValue()).isEmpty()) {
+					if (userService.findByUserName(((TextField) userName).getValue()) == null) {
 						fields.commit();
 						user.setUserName(user.getUserName().toLowerCase().trim());
-						//user.setPassword(MD5Hash.encrypt(user.getPassword()));
 						user.setUserRole(UserRole.Initiator);
+//						user.setRequestSet(new HashSet<>());
 						userService.saveOrPersist(user);
 						success = true;
 					} else {

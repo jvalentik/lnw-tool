@@ -2,10 +2,9 @@ package com.ibm.lnw.presentation.views;
 
 import com.ibm.lnw.backend.UserService;
 import com.ibm.lnw.backend.domain.User;
-import com.ibm.lnw.backend.domain.UserRole;
 import com.ibm.lnw.presentation.AppUI;
 import com.ibm.lnw.presentation.model.CustomAccessControl;
-import com.ibm.lnw.presentation.model.UserInfo;
+import com.ibm.lnw.presentation.views.events.LoginEvent;
 import com.vaadin.cdi.CDIView;
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.navigator.Navigator;
@@ -21,7 +20,6 @@ import org.vaadin.teemu.VaadinIcons;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import java.util.List;
 
 /**
  * Created by Jan Valentik on 11/20/2015.
@@ -38,25 +36,25 @@ public class LoginView extends CustomComponent implements View {
 	private UserService userService;
 
 	@Inject
-	private UserInfo currentUser;
-
-	@Inject
 	private CustomAccessControl accessControl;
 
+	@Inject
+	@LoginEvent(LoginEvent.Type.LOGIN_SUCCEEDED)
+	private javax.enterprise.event.Event<User> authenticatedUser;
+
 	public void enter(ViewChangeListener.ViewChangeEvent event) {
-		AppUI.getMenu().setVisible(false);
 		params = event.getParameters();
 		System.out.println("View Param: " + params);
 		if (accessControl.isUserSignedIn()) {
+            AppUI.getMenu().setVisible(false);
 			Notification.show("Log out", "You have been logged out", Notification.Type.TRAY_NOTIFICATION);
+            accessControl.getUserInfo().setUser(null);
 		}
-		currentUser.setUser(null);
 		username.focus();
 	}
 
 	@PostConstruct
 	private void init() {
-		AppUI.getMenu().setVisible(false);
 		username = new TextField();
 		password = new PasswordField();
 		login = new Button();
@@ -131,16 +129,12 @@ public class LoginView extends CustomComponent implements View {
 
 	private void login() {
 		System.out.println("View param in login: " + params);
-		User currentUser = new User();
-		currentUser.setUserName(username.getValue().toLowerCase().trim());
-		currentUser.setPassword(password.getValue());
-		currentUser.setUserRole(UserRole.Initiator);
-		this.currentUser.setUser(currentUser);
-		List<User> userList = userService.findByUserName(currentUser.getUserName().toLowerCase());
-		if (!userList.isEmpty()) {
-			User tempUser = userList.get(0);
-			if (currentUser.equals(tempUser)) {
-				this.currentUser.setUser(tempUser);
+		User unknownUser = new User();
+		unknownUser.setUserName(username.getValue().toLowerCase().trim());
+		unknownUser.setPassword(password.getValue());
+		User foundUser = userService.findByUserName(unknownUser.getUserName().toLowerCase());
+		if (foundUser != null) {
+			if (unknownUser.equals(foundUser)) {
 				System.out.println("User found");
 				if (params.contains("?request_id=")) {
 					System.out.println("Navigating to: " + "request-list/?request_id=" + params.split("=")[1]);
@@ -148,10 +142,11 @@ public class LoginView extends CustomComponent implements View {
 					navigator.navigateTo("request-list/?request_id=" + params.split("=")[1]);
 				}
 				else {
-					AppUI.getMenu().navigateTo("submitter-view");
+					//UI.getCurrent().getNavigator().navigateTo("submitter-view");
+					authenticatedUser.fire(foundUser);
 				}
 			} else {
-				this.currentUser.setUser(null);
+				//this.currentUser.setUser(null);
 				Notification notification = new Notification("Login failed", "Please check your username and password and" +
 						" try again", Notification.Type.HUMANIZED_MESSAGE);
 				notification.setDelayMsec(2000);
@@ -159,7 +154,7 @@ public class LoginView extends CustomComponent implements View {
 			}
 		}
 		else {
-			this.currentUser.setUser(null);
+			//this.currentUser.setUser(null);
 			Notification notification = new Notification("Login failed", "Please check your username and password and" +
 					" try again", Notification.Type.HUMANIZED_MESSAGE);
 			notification.setDelayMsec(2000);
@@ -170,7 +165,7 @@ public class LoginView extends CustomComponent implements View {
 	private void requestAccess() {
 		username.setValue("");
 		password.setValue("");
-		UI.getCurrent().addWindow(new AddUserView(userService));
+		AppUI.getCurrent().addWindow(new AddUserView(userService));
 	}
 }
 

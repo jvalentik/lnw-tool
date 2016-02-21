@@ -39,7 +39,7 @@ public class SendGridService {
 		SendGrid.Email email = new SendGrid.Email();
 		email.addTo(request.getPmaName());
 		email.setFrom("lnwtool@sk.ibm.com");
-		email.setSubject(request.getSubmitterUserName() + " sent you a new request in the LNW Tool");
+		email.setSubject(request.getCreatedBy().getUserName() + " sent you a new request in the LNW Tool");
 		email.setHtml("<body><p>There is a new request for you in the LNW Tool --> " +
 				"<a href=\"http://lnwtool.eu-gb.mybluemix.net/?request_id=" + request.getId() + "\">Link to this request</a></p>" +
 				"<a href=\"http://lnwtool.eu-gb.mybluemix.net\">Link to LNW Tool</a>" +

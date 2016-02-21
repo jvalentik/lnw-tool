@@ -2,8 +2,8 @@ package com.ibm.lnw.presentation.views;
 
 import com.ibm.lnw.backend.UserService;
 import com.ibm.lnw.backend.domain.User;
-import com.ibm.lnw.presentation.AppUI;
 import com.ibm.lnw.presentation.model.CustomAccessControl;
+import com.ibm.lnw.presentation.views.events.UserEvent;
 import com.vaadin.cdi.CDIView;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
@@ -90,7 +90,9 @@ public class AdminView extends MVerticalLayout implements View {
 
     private void listUsers(String filterString) {
         userMTable.setBeans(new ArrayList<>(userService.findByName(filterString)));
-    }
+
+
+	}
 
 	void editUser(User user) {
 		if (user != null) {
@@ -115,7 +117,7 @@ public class AdminView extends MVerticalLayout implements View {
 		if (userForm.getParent() == mainContent) {
 			mainContent.removeComponent(userForm);
 		} else {
-			AppUI.get().getContentLayout().replaceComponent(userForm, this);
+			//AppUI.get().getContentLayout().replaceComponent(userForm, this);
 		}
 	}
 

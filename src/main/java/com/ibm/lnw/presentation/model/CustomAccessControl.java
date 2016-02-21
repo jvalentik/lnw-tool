@@ -45,4 +45,8 @@ public class CustomAccessControl extends AccessControl {
 		}
 		return null;
 	}
+
+	public UserInfo getUserInfo() {
+		return userInfo;
+	}
 }

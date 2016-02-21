@@ -7,8 +7,6 @@ import com.vaadin.data.validator.BeanValidator;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
 
-import java.util.List;
-
 /**
  * Created by Jan Valentik on 12/5/2015.
  */
@@ -30,8 +28,8 @@ public class ResetPassword extends Window {
 		});
 
 		okButton.addClickListener(clickEvent -> {
-			List<User> users = userService.findByUserName(userName.getValue());
-			if (!users.isEmpty()) {
+			User foundUser = userService.findByUserName(userName.getValue());
+			if (foundUser != null) {
 				try {
 					SendGridService.sendResetLink(userName.getValue());
 				}

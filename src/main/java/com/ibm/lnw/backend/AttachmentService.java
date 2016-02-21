@@ -5,7 +5,6 @@ import com.ibm.lnw.backend.domain.Attachment;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.List;
 
 /**
  * Created by Jan Valentik on 11/30/2015.
@@ -21,8 +20,8 @@ public class AttachmentService {
 		entityManager.persist(entity);
 	}
 
-	public List<Attachment> findAllByRequestId(long requestId) {
+	/*public List<Attachment> findAllByRequestId(long requestId) {
 		return entityManager.createNamedQuery("Attachment.findAllByFilter", Attachment.class).setParameter
-				("filter", requestId).getResultList();
-	}
+				("filter", mainRequest).getResultList();
+	}*/
 }

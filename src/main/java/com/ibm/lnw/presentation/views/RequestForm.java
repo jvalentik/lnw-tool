@@ -6,7 +6,8 @@ import com.ibm.lnw.backend.domain.Attachment;
 import com.ibm.lnw.backend.domain.Request;
 import com.ibm.lnw.backend.domain.RequestStatus;
 import com.ibm.lnw.presentation.model.CustomAccessControl;
-import com.vaadin.server.StreamResource;
+import com.ibm.lnw.presentation.model.CustomFileDownloader;
+import com.ibm.lnw.presentation.views.events.RequestEvent;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
 import org.vaadin.viritin.button.MButton;
@@ -22,8 +23,11 @@ import javax.annotation.PostConstruct;
 import javax.ejb.EJBException;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
-import java.io.*;
-import java.util.List;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Date;
+import java.util.Set;
 
 @Dependent
 public class RequestForm extends AbstractForm<Request> {
@@ -52,12 +56,14 @@ public class RequestForm extends AbstractForm<Request> {
     TextField pexName = new MTextField("PE Name");
     DateField dateTimeStamp = new MDateField("Submitted on: ");
     TypedSelect<RequestStatus> status = new TypedSelect().withCaption("Request status");
-    Button download = new MButton("Download").withDescription("Download attachments");
+    Button downloadButton = new MButton("Download").withDescription("Download attachments");
+    MFormLayout form;
+    final CustomFileDownloader downloader = new CustomFileDownloader();
 
     @Override
     protected Component createContent() {
         setStyleName(ValoTheme.LAYOUT_CARD);
-        MFormLayout form = new MFormLayout(leadingWBS,
+        form = new MFormLayout(leadingWBS,
                 customerName,
                 contractNumber,
                 services,
@@ -65,14 +71,9 @@ public class RequestForm extends AbstractForm<Request> {
                 pexName,
                 status,
                 dateTimeStamp).withFullWidth();
-        if (accessControl.isUserInRole("Initiator")) {
-            form.setEnabled(false);
-        }
-        else {
-            form.setEnabled(true);
-        }
+        adjustFormState();
 	    return new MVerticalLayout(new Header("Request").setHeaderLevel(3),
-                form, download,
+                form, downloadButton,
                 getToolbar())
                 .withStyleName(ValoTheme.LAYOUT_CARD);
     }
@@ -82,11 +83,29 @@ public class RequestForm extends AbstractForm<Request> {
         setEagerValidation(true);
         status.setWidthUndefined();
         status.setOptions(RequestStatus.values());
-        //StreamResource myResource = createResource();
-        //FileDownloader fileDownloader = new FileDownloader(myResource);
-        //fileDownloader.extend(download);
+        downloader.addAdvancedDownloaderListener(downloadEvent -> {
+            final String TEMP_FILE_DIR = new File(System.getProperty("java.io.tmpdir")).getPath();
+            Set<Attachment> attachments = getEntity().getAttachmentSet();
+            Attachment attachment = attachments.iterator().next();
+            File newAttachment = new File(TEMP_FILE_DIR + "/" + attachment.getFileName());
+            FileOutputStream outputStream;
+            try {
+                outputStream = new FileOutputStream(newAttachment);
+                outputStream.write(attachment.getFileContent());
+                downloader.setFilePath(TEMP_FILE_DIR + "/" + attachment.getFileName());
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+                System.out.println(TEMP_FILE_DIR + "/" + attachment.getFileName() + " wasn't found");
+            }
+            System.out.println("Starting download by button ");
+        });
+        downloader.extend(downloadButton);
+
         setSavedHandler(e -> {
             try {
+                e.setModifiedOn(new Date());
+                e.setLastModifiedBy(accessControl.getPrincipalName());
                 requestService.saveOrPersist(e);
                 saveEvent.fire(e);
             } catch (EJBException ex) {
@@ -102,7 +121,7 @@ public class RequestForm extends AbstractForm<Request> {
     @Override
     protected void adjustResetButtonState() {
         getResetButton().setEnabled(true);
-        if (accessControl.isUserInRole("Initiator")) {
+        if (accessControl.isUserInRole("Initiator") && getEntity().getStatus() != RequestStatus.Clarification) {
             getSaveButton().setVisible(false);
         } else {
             getSaveButton().setVisible(true);
@@ -110,7 +129,27 @@ public class RequestForm extends AbstractForm<Request> {
         }
     }
 
-    private StreamResource createResource() {
+    private void adjustFormState() {
+        switch (accessControl.getUserInfo().getUser().getUserRole()) {
+            case Initiator:
+                if (getEntity().getStatus() == RequestStatus.Clarification) {
+                    form.setEnabled(true);
+                } else {
+                    form.setEnabled(false);
+                }
+                break;
+            case Viewer:
+                form.setEnabled(false);
+                break;
+            default:
+                form.setEnabled(true);
+        }
+
+    }
+
+
+
+    /*private StreamResource createResource() {
         final String TEMP_FILE_DIR = new File(System.getProperty("java.io.tmpdir")).getPath();
         List<Attachment> attachments = attachmentService.findAllByRequestId(getEntity().getId());
 
@@ -133,5 +172,5 @@ public class RequestForm extends AbstractForm<Request> {
                 }
             }
         }, attachments.get(0).getFileName());
-    }
+    }*/
 }

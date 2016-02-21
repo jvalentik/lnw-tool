@@ -35,5 +35,7 @@
 
     <inherits name="com.ejt.vaadin.loginform.WidgetSet" />
 
+    
+
     <inherits name="org.vaadin.addon.leaflet.Widgetset" />
 </module>

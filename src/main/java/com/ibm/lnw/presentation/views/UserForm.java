@@ -3,6 +3,7 @@ package com.ibm.lnw.presentation.views;
 import com.ibm.lnw.backend.UserService;
 import com.ibm.lnw.backend.domain.User;
 import com.ibm.lnw.backend.domain.UserRole;
+import com.ibm.lnw.presentation.views.events.UserEvent;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.PasswordField;

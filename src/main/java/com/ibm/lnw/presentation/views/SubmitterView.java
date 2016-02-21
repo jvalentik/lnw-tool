@@ -6,7 +6,6 @@ import com.ibm.lnw.backend.domain.Attachment;
 import com.ibm.lnw.backend.domain.Contract;
 import com.ibm.lnw.backend.domain.Request;
 import com.ibm.lnw.backend.domain.RequestStatus;
-import com.ibm.lnw.presentation.AppUI;
 import com.ibm.lnw.presentation.model.CustomAccessControl;
 import com.ibm.lnw.presentation.model.FileUploader;
 import com.ibm.lnw.presentation.model.SendGridService;
@@ -67,11 +66,10 @@ public class SubmitterView extends CustomComponent implements View {
 
 	@PostConstruct
 	public void init() {
-		AppUI.getMenu().setVisible(true);
 		request = new Request();
 		attachments = new LinkedList<>();
 		fileStorage = new HashMap<>();
-		request.setSubmitterUserName(accessControl.getPrincipalName());
+		request.setCreatedBy(accessControl.getUserInfo().getUser());
 		FileUploader fileUploader = new FileUploader(fileStorage);
 		fileUploader.setEnabled(false);
 		BeanItem<Request> item = new BeanItem<>(request);
@@ -214,7 +212,6 @@ public class SubmitterView extends CustomComponent implements View {
 		try {
 			group.commit();
 			request.setStatus(RequestStatus.Open);
-			int requestId = requestService.saveOrPersist(request);
 			if (!fileStorage.isEmpty()) {
 				fileStorage.forEach((k, v) -> {
 					byte[] bytes = new byte[(int) v.length()];
@@ -234,9 +231,10 @@ public class SubmitterView extends CustomComponent implements View {
 				});
 			}
 			attachments.forEach(attachment -> {
-				attachment.setRequestId(requestId);
 				attachmentService.persist(attachment);
 			});
+			request.setLastModifiedBy(accessControl.getPrincipalName());
+			requestService.saveOrPersist(request);
 
 			SendGridService.sendEmail(request);
 			Notification.show("Your request has been submitted", Notification.Type.TRAY_NOTIFICATION);
@@ -251,7 +249,7 @@ public class SubmitterView extends CustomComponent implements View {
 			Notification.show("Email not sent", "Failed to send notification email", Notification.Type.WARNING_MESSAGE);
 		}
 		request = new Request();
-		request.setSubmitterUserName(accessControl.getPrincipalName());
+		request.setCreatedBy(accessControl.getUserInfo().getUser());
 		group.clear();
 		table.removeAllItems();
 

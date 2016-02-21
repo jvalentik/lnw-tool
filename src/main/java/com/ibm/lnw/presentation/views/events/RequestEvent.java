@@ -1,4 +1,4 @@
-package com.ibm.lnw.presentation.views;
+package com.ibm.lnw.presentation.views.events;
 
 import javax.inject.Qualifier;
 import java.lang.annotation.Retention;

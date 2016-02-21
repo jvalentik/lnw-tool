@@ -6,8 +6,6 @@ import com.vaadin.data.validator.BeanValidator;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
 
-import java.util.List;
-
 /**
  * Created by Jan Valentik on 12/5/2015.
  */
@@ -27,10 +25,10 @@ public class ResetPasswordForm extends Window {
 		okButton.setStyleName(ValoTheme.BUTTON_PRIMARY);
 		okButton.addClickListener(clickEvent -> {
 			if (passwordField.isValid() && passwordField.getValue().equals(repeatPassword.getValue())) {
-				List<User> userList = userService.findByUserName(userName);
-				if (!userList.isEmpty()) {
-					userList.get(0).setPassword(passwordField.getValue());
-					userService.saveOrPersist(userList.get(0));
+				User foundUser = userService.findByUserName(userName);
+				if (foundUser != null) {
+					foundUser.setPassword(passwordField.getValue());
+					userService.saveOrPersist(foundUser);
 					Notification.show("Your password has been changed", Notification.Type.TRAY_NOTIFICATION);
 					close();
 				}

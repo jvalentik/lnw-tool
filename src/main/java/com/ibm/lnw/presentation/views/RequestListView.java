@@ -4,6 +4,7 @@ import com.ibm.lnw.backend.RequestService;
 import com.ibm.lnw.backend.domain.Request;
 import com.ibm.lnw.presentation.AppUI;
 import com.ibm.lnw.presentation.model.CustomAccessControl;
+import com.ibm.lnw.presentation.views.events.RequestEvent;
 import com.vaadin.cdi.CDIView;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
@@ -11,7 +12,6 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import org.vaadin.viritin.fields.MTable;
@@ -23,7 +23,6 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import java.util.ArrayList;
-import java.util.List;
 
 @CDIView(value = "request-list", supportsParameters = true)
 @ViewMenuItem(icon = FontAwesome.LIST, title = "Requests", order = 2)
@@ -125,7 +124,7 @@ public class RequestListView extends MVerticalLayout implements View {
 		if (requestForm.getParent() == mainContent) {
 			mainContent.removeComponent(requestForm);
 		} else {
-			AppUI.get().getContentLayout().replaceComponent(requestForm, this);
+			AppUI.getMenu().replaceComponent(requestForm, this);
 		}
 	}
 
@@ -142,23 +141,6 @@ public class RequestListView extends MVerticalLayout implements View {
 
 	@Override
 	public void enter(ViewChangeListener.ViewChangeEvent event) {
-		System.out.println("Entered request-list view");
-		AppUI.getMenu().setVisible(true);
-		if (event.getParameters().contains("?request_id=")) {
-			List<Request> foundRequests = requestService.findByID(Integer.parseInt(event.getParameters().split("=")[1]));
-			if (!foundRequests.isEmpty() && foundRequests.get(0).getSubmitterUserName().equals(accessControl.getPrincipalName())) {
-				editRequest(foundRequests.get(0));
-			}
-			else {
-				Notification.show("Request not found", "The request you were trying to open is inaccessible to you",
-						Notification.Type.WARNING_MESSAGE);
-				AppUI.getMenu().navigateTo("login");
-			}
 
-		}
-		if (!accessControl.isUserSignedIn()) {
-			AppUI.getMenu().navigateTo("");
-			Notification.show("User not signed", "Please sign in", Notification.Type.TRAY_NOTIFICATION);
-		}
 	}
 }

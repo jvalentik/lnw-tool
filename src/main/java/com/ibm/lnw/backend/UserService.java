@@ -18,11 +18,13 @@ public class UserService {
 	private EntityManager entityManager;
 
 	public void saveOrPersist(User entity) {
+		System.out.println(entity);
 		if (entity.getId() > 0) {
 			entityManager.merge(entity);
 		} else {
 			entityManager.persist(entity);
 		}
+		entityManager.flush();
 	}
 
 	public void deleteEntity(User entity) {
@@ -45,9 +47,11 @@ public class UserService {
 				.setParameter("filter", filter).getResultList();
 	}
 
-    public List<User> findByUserName(String userName) {
-        return entityManager.createNamedQuery("User.findByUserName", User.class).setParameter("filter", userName)
-                .getResultList();
+    public User findByUserName(String userName) {
+		List<User> userList = entityManager.createNamedQuery("User.findByUserName", User.class).setParameter("filter", userName).getResultList();
+		if (userList.size() != 1)
+			return null;
+		return userList.get(0);
     }
 }
 

@@ -7,23 +7,24 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
+import java.util.Set;
 
 /**
  * Created by Jan Valentik on 11/20/2015.
  */
-
 @NamedQueries({
 		@NamedQuery(name="User.findAll",
 				query="SELECT u FROM User u"),
-        @NamedQuery(name = "User.findByUserName", query = "SELECT u FROM User u WHERE LOWER(u.userName) LIKE :filter"),
+		@NamedQuery(name = "User.findByUserName", query = "SELECT u FROM User u WHERE LOWER(u.userName) LIKE :filter"),
 		@NamedQuery(name="User.findByName",
 				query="SELECT u FROM User u WHERE LOWER(u.firstName) LIKE :filter OR LOWER(u.lastName) LIKE :filter"),
 })
+
 @Entity
 public class User implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
+	private long id;
 
 	@NotNull(message = "IBM Intranet ID is required")
 	@Pattern(regexp = ".*@([a-zA-Z]{2})\\.(ibm|IBM)\\.(com|COM)", message = "IBM Intranet ID is required")
@@ -38,12 +39,21 @@ public class User implements Serializable {
 	@NotNull(message = "Last name is required")
 	private String lastName;
 
+	@Enumerated(EnumType.ORDINAL)
 	private UserRole userRole;
+
+	@Enumerated(EnumType.ORDINAL)
+	private Permissions permissions;
+
+	@OneToMany(mappedBy = "createdBy")
+	private Set<Request> requestSet;
 
 
 	public User() {
 		password = lastName = firstName = userName = "";
 		userRole = UserRole.Initiator;
+		permissions = Permissions.Create;
+
 	}
 
 	@Override
@@ -62,11 +72,11 @@ public class User implements Serializable {
 		this.userName = userName;
 	}
 
-	public int getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -100,6 +110,22 @@ public class User implements Serializable {
 
 	public void setUserRole(UserRole userRole) {
 		this.userRole = userRole;
+	}
+
+	public Set<Request> getRequestSet() {
+		return requestSet;
+	}
+
+	public void setRequestSet(Set<Request> requestSet) {
+		this.requestSet = requestSet;
+	}
+
+	public Permissions getPermissions() {
+		return permissions;
+	}
+
+	public void setPermissions(Permissions permissions) {
+		this.permissions = permissions;
 	}
 
 	public boolean isPersisted() {

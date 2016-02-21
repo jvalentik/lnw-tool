@@ -5,27 +5,28 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Set;
 
 /**
  * Created by Jan Valentik on 11/15/2015.
  */
 @NamedQueries({
 		@NamedQuery(name="Request.findAll",
-					query="SELECT r FROM Request r"),
+				query="SELECT r FROM Request r"),
 		@NamedQuery(name="Request.findAllByUser",
-					query="SELECT r FROM Request r WHERE r.submitterUserName=:filter"),
+				query="SELECT r FROM Request r WHERE r.createdBy.userName=:filter"),
 		@NamedQuery(name="Request.findAllByUserAndFilter",
-					query = "SELECT r FROM Request r WHERE r.submitterUserName=:filter1 AND (LOWER(r.leadingWBS) LIKE" +
-							" :filter2 OR LOWER(r.customerName) LIKE :filter2)"),
+				query = "SELECT r FROM Request r WHERE r.createdBy.userName=:filter1 AND (LOWER(r.leadingWBS) LIKE" +
+						" :filter2 OR LOWER(r.customerName) LIKE :filter2)"),
 		@NamedQuery(name="Request.findByID", query = "SELECT r FROM Request r WHERE r.id=:filter"),
-        @NamedQuery(name="Request.findByFilter", query = "SELECT r FROM Request r WHERE LOWER(r.leadingWBS) LIKE " +
-                ":filter OR LOWER(r.customerName) LIKE :filter")
+		@NamedQuery(name="Request.findByFilter", query = "SELECT r FROM Request r WHERE LOWER(r.leadingWBS) LIKE " +
+				":filter OR LOWER(r.customerName) LIKE :filter")
 })
 @Entity
 public class Request implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
+	private long id;
 
 	@NotNull
 	@Pattern(regexp = "([a-zA-Z]\\.)+(\\w{5}\\.)+(\\d{3})", message = "WBS must be in format x.xxxxx.xxx")
@@ -40,27 +41,33 @@ public class Request implements Serializable {
 	private String pmaName;
 	private String pexName;
 	private String comments;
-	private String submitterUserName;
+
+	@ManyToOne
+	private User createdBy;
+
+	private String lastModifiedBy;
+
+	@Temporal(TemporalType.DATE)
+	private Date modifiedOn;
+
+	@OneToMany(mappedBy = "mainRequest")
+	private Set<Attachment> attachmentSet;
 
     @Temporal(TemporalType.DATE)
 	private Date dateTimeStamp;
+
+	@Enumerated(EnumType.ORDINAL)
 	private RequestStatus status;
 
 	public Request() {
-		customerName = contractNumber = services = pmaName = pexName = comments = submitterUserName = leadingWBS ="";
+		customerName = contractNumber = services = pmaName = pexName = comments = leadingWBS ="";
 		dateTimeStamp = new Date();
+		modifiedOn = dateTimeStamp;
+
 		status = RequestStatus.Open;
 	}
 
-    public String getSubmitterUserName() {
-		return submitterUserName;
-	}
-
-	public void setSubmitterUserName(String submitterUserName) {
-		this.submitterUserName = submitterUserName;
-	}
-
-	public String getCustomerName() {
+   	public String getCustomerName() {
 		return customerName;
 	}
 
@@ -120,11 +127,11 @@ public class Request implements Serializable {
 		this.leadingWBS = leadingWBS.trim();
 	}
 
-	public int getId() {
+	public Long getId() {
 		return id;
 	}
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -138,5 +145,41 @@ public class Request implements Serializable {
 
 	public void setStatus(RequestStatus status) {
 		this.status = status;
+	}
+
+	public User getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(User createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	public String getLastModifiedBy() {
+		return lastModifiedBy;
+	}
+
+	public void setLastModifiedBy(String lastModifiedBy) {
+		this.lastModifiedBy = lastModifiedBy;
+	}
+
+	public Date getModifiedOn() {
+		return modifiedOn;
+	}
+
+	public void setModifiedOn(Date modifiedOn) {
+		this.modifiedOn = modifiedOn;
+	}
+
+	public Set<Attachment> getAttachmentSet() {
+		return attachmentSet;
+	}
+
+	public void setAttachmentSet(Set<Attachment> attachmentSet) {
+		this.attachmentSet = attachmentSet;
 	}
 }
