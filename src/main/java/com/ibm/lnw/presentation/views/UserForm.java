@@ -46,9 +46,6 @@ public class UserForm extends AbstractForm<User> {
 	TextField userName = new MTextField("Intranet ID");
     PasswordField password = new MPasswordField("Password");
 	TypedSelect<UserRole> userRole = new TypedSelect().withCaption("Type of access");
-    private String initialPassword;
-
-
 
 	@Override
 	protected Component createContent() {
@@ -61,15 +58,11 @@ public class UserForm extends AbstractForm<User> {
 
 	@PostConstruct
 	void init() {
-        initialPassword = getEntity().getPassword();
-		setEagerValidation(true);
+        setEagerValidation(true);
 		userRole.setWidthUndefined();
 		userRole.setOptions(UserRole.values());
 		setSavedHandler(user -> {
 				try {
-                    /*if (!MD5Hash.encrypt(password.getValue()).equals(getEntity().getPassword())) {
-                        user.setPassword(MD5Hash.encrypt(password.getValue()));
-                    }*/
                     userService.saveOrPersist(user);
 					saveEvent.fire(user);
 				}
@@ -78,7 +71,6 @@ public class UserForm extends AbstractForm<User> {
 							"discarded", Notification.Type.WARNING_MESSAGE);
 					refreshEvent.fire(user);
 				}
-
 
 		});
 		setResetHandler(user -> refreshEvent.fire(user));

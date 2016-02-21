@@ -2,12 +2,10 @@ package com.ibm.lnw.presentation.views;
 
 import com.ibm.lnw.backend.UserService;
 import com.ibm.lnw.backend.domain.User;
-import com.ibm.lnw.presentation.model.MD5Hash;
 import com.vaadin.data.validator.BeanValidator;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
 
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 /**
@@ -31,13 +29,7 @@ public class ResetPasswordForm extends Window {
 			if (passwordField.isValid() && passwordField.getValue().equals(repeatPassword.getValue())) {
 				List<User> userList = userService.findByUserName(userName);
 				if (!userList.isEmpty()) {
-					try {
-						userList.get(0).setPassword(MD5Hash.encrypt(passwordField.getValue()));
-					}
-					catch (NoSuchAlgorithmException ex) {
-						ex.printStackTrace();
-						return;
-					}
+					userList.get(0).setPassword(passwordField.getValue());
 					userService.saveOrPersist(userList.get(0));
 					Notification.show("Your password has been changed", Notification.Type.TRAY_NOTIFICATION);
 					close();

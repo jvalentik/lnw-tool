@@ -80,8 +80,8 @@ public class AdminView extends MVerticalLayout implements View {
 	}
 
 	private void adjustTableColumns() {
-		userMTable.setVisibleColumns(new Object[]{"firstName", "lastName", "userRole"});
-		userMTable.setColumnHeaders(new String[]{"First name", "Last name", "Type of access"});
+		/*userMTable.setVisibleColumns(new Object[]{"firstName", "lastName", "userRole"});
+		userMTable.setColumnHeaders(new String[]{"First name", "Last name", "Type of access"});*/
 	}
 
 	private void listUsers() {

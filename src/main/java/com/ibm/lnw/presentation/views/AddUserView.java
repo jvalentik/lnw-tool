@@ -3,15 +3,12 @@ package com.ibm.lnw.presentation.views;
 import com.ibm.lnw.backend.UserService;
 import com.ibm.lnw.backend.domain.User;
 import com.ibm.lnw.backend.domain.UserRole;
-import com.ibm.lnw.presentation.model.MD5Hash;
 import com.vaadin.data.Property;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
-
-import java.security.NoSuchAlgorithmException;
 
 /**
  * Created by Jan Valentik on 11/25/2015.
@@ -68,18 +65,15 @@ public class AddUserView extends Window implements Property.ValueChangeListener{
 					if (userService.findByName(((TextField) userName).getValue()).isEmpty()) {
 						fields.commit();
 						user.setUserName(user.getUserName().toLowerCase().trim());
-						user.setPassword(MD5Hash.encrypt(user.getPassword()));
+						//user.setPassword(MD5Hash.encrypt(user.getPassword()));
 						user.setUserRole(UserRole.Initiator);
 						userService.saveOrPersist(user);
 						success = true;
-					}
-					else {
+					} else {
 						Notification.show("User already exists ", Notification.Type.WARNING_MESSAGE);
 						return;
 
 					}
-				} catch (NoSuchAlgorithmException  nex) {
-					 Notification.show("Saving failed", "Saving data to database faile", Notification.Type.ERROR_MESSAGE);
 				}
 				catch (FieldGroup.CommitException ex) {
 					Notification.show("Mandatory fields not filled", "Please make sure all mandatory are filled",

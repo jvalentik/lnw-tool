@@ -5,6 +5,10 @@
         <class>com.ibm.lnw.backend.domain.User</class>
         <class>com.ibm.lnw.backend.domain.Request</class>
         <class>com.ibm.lnw.backend.domain.Attachment</class>
+        <properties>
+            <!--property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/-->
+        </properties>
+
 
     </persistence-unit>
 </persistence>

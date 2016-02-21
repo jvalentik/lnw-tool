@@ -5,7 +5,6 @@ import com.ibm.lnw.backend.domain.User;
 import com.ibm.lnw.backend.domain.UserRole;
 import com.ibm.lnw.presentation.AppUI;
 import com.ibm.lnw.presentation.model.CustomAccessControl;
-import com.ibm.lnw.presentation.model.MD5Hash;
 import com.ibm.lnw.presentation.model.UserInfo;
 import com.vaadin.cdi.CDIView;
 import com.vaadin.event.ShortcutAction;
@@ -22,7 +21,6 @@ import org.vaadin.teemu.VaadinIcons;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 /**
@@ -135,12 +133,7 @@ public class LoginView extends CustomComponent implements View {
 		System.out.println("View param in login: " + params);
 		User currentUser = new User();
 		currentUser.setUserName(username.getValue().toLowerCase().trim());
-		try {
-			currentUser.setPassword(MD5Hash.encrypt(password.getValue()));
-		} catch (NoSuchAlgorithmException nx) {
-			nx.printStackTrace();
-			throw new RuntimeException("Failed to encrypt password");
-		}
+		currentUser.setPassword(password.getValue());
 		currentUser.setUserRole(UserRole.Initiator);
 		this.currentUser.setUser(currentUser);
 		List<User> userList = userService.findByUserName(currentUser.getUserName().toLowerCase());
