@@ -71,7 +71,7 @@ public class RequestForm extends AbstractForm<Request> {
                 pexName,
                 status,
                 dateTimeStamp).withFullWidth();
-        adjustFormState();
+
 	    return new MVerticalLayout(new Header("Request").setHeaderLevel(3),
                 form, downloadButton,
                 getToolbar())
@@ -80,6 +80,8 @@ public class RequestForm extends AbstractForm<Request> {
 
     @PostConstruct
     void init() {
+        System.out.println("Entity set:" + getEntity() == null);
+        adjustFormState();
         setEagerValidation(true);
         status.setWidthUndefined();
         status.setOptions(RequestStatus.values());
@@ -118,10 +120,12 @@ public class RequestForm extends AbstractForm<Request> {
         setResetHandler(e -> refreshEvent.fire(e));
     }
 
+
+
     @Override
     protected void adjustResetButtonState() {
         getResetButton().setEnabled(true);
-        if (accessControl.isUserInRole("Initiator") && getEntity().getStatus() != RequestStatus.Clarification) {
+        if (accessControl.isUserInRole("Initiator")) {
             getSaveButton().setVisible(false);
         } else {
             getSaveButton().setVisible(true);
@@ -130,14 +134,11 @@ public class RequestForm extends AbstractForm<Request> {
     }
 
     private void adjustFormState() {
+        System.out.println("User is: " + accessControl.getUserInfo().getUser().getUserRole());
+        System.out.println(getEntity().toString());
         switch (accessControl.getUserInfo().getUser().getUserRole()) {
             case Initiator:
-                if (getEntity().getStatus() == RequestStatus.Clarification) {
-                    form.setEnabled(true);
-                } else {
-                    form.setEnabled(false);
-                }
-                break;
+                form.setEnabled(false);
             case Viewer:
                 form.setEnabled(false);
                 break;
@@ -146,31 +147,4 @@ public class RequestForm extends AbstractForm<Request> {
         }
 
     }
-
-
-
-    /*private StreamResource createResource() {
-        final String TEMP_FILE_DIR = new File(System.getProperty("java.io.tmpdir")).getPath();
-        List<Attachment> attachments = attachmentService.findAllByRequestId(getEntity().getId());
-
-
-        return new StreamResource(new StreamResource.StreamSource() {
-            @Override
-            public InputStream getStream() {
-                try {
-                    FileOutputStream outputStream = new FileOutputStream(TEMP_FILE_DIR +
-                            attachments.get(0).getFileName());
-                    outputStream.write(attachments.get(0).getFileContent());
-                    outputStream.close();
-                    return new FileInputStream(TEMP_FILE_DIR + attachments.get(0).getFileName());
-
-                }
-                catch (IOException ex) {
-                    ex.printStackTrace();
-                    System.out.println("File not found");
-                    return null;
-                }
-            }
-        }, attachments.get(0).getFileName());
-    }*/
 }

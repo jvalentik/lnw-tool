@@ -6,19 +6,25 @@ import java.io.Serializable;
 /**
  * Created by Jan Valentik on 11/30/2015.
  */
+@NamedQueries(
+        @NamedQuery(name="Attachment.findAllByFilter",
+                query="SELECT a FROM Attachment a WHERE a.mainRequest.id=:filter")
+
+)
 
 @Entity
 public class Attachment implements Serializable{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+   	private long id;
 
 	@Lob
 	private byte[] fileContent;
 
 	@ManyToOne
-	private Request mainRequest;
+    @JoinColumn(name = "MAINREQUEST_ID")
+    private Request mainRequest;
 
 	private String fileName;
 	private String mimeType;
@@ -28,7 +34,11 @@ public class Attachment implements Serializable{
 		return id;
 	}
 
-	public byte[] getFileContent() {
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public byte[] getFileContent() {
 		return fileContent;
 	}
 
@@ -58,10 +68,6 @@ public class Attachment implements Serializable{
 
 	public void setMimeType(String mimeType) {
 		this.mimeType = mimeType;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public Request getMainRequest() {

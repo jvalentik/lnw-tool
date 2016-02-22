@@ -1,8 +1,10 @@
 package com.ibm.lnw.backend;
 
 import com.ibm.lnw.backend.domain.Request;
+import com.ibm.lnw.presentation.model.CustomAccessControl;
 
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaQuery;
@@ -15,10 +17,13 @@ import java.util.List;
 @Stateless
 public class RequestService {
 
+    @Inject
+    private CustomAccessControl accessControl;
+
 	@PersistenceContext(unitName = "application-pu")
 	private EntityManager entityManager;
 
-	public Long saveOrPersist(Request entity) {
+	public long saveOrPersist(Request entity) {
         if (entity.getId() > 0) {
             entityManager.merge(entity);
         }
@@ -55,5 +60,9 @@ public class RequestService {
     public List<Request> findByFilter(String filter) {
         return entityManager.createNamedQuery("Request.findByFilter", Request.class).setParameter("filter", filter)
                 .getResultList();
+    }
+
+    public List<Request> findAssigned(String name) {
+        return entityManager.createNamedQuery("Request.findAssigned", Request.class).setParameter("filter", name).getResultList();
     }
 }

@@ -9,12 +9,12 @@ import com.ibm.lnw.backend.domain.RequestStatus;
 import com.ibm.lnw.presentation.model.CustomAccessControl;
 import com.ibm.lnw.presentation.model.FileUploader;
 import com.ibm.lnw.presentation.model.SendGridService;
+import com.ibm.lnw.presentation.views.events.NavigationEvent;
 import com.vaadin.cdi.CDIView;
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.validator.BeanValidator;
 import com.vaadin.data.validator.StringLengthValidator;
-import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
@@ -54,13 +54,15 @@ public class SubmitterView extends CustomComponent implements View {
 	@Inject
 	private AttachmentService attachmentService;
 
+        @Inject
+    private javax.enterprise.event.Event<NavigationEvent> navigationEvent;
+
 
 	public void enter(ViewChangeListener.ViewChangeEvent viewChangeEvent) {
         System.out.println("In adminView.enter()");
-        if (!accessControl.isUserInRole("Initiator")) {
+        if (!accessControl.isUserInRole("Initiator") && !accessControl.isUserInRole("Administrator")) {
             Notification.show("You do not have access to perform this operation", Notification.Type.WARNING_MESSAGE);
-            Navigator navigator = UI.getCurrent().getNavigator();
-            navigator.navigateTo("request-list");
+            navigationEvent.fire(new NavigationEvent("request-list"));
         }
 	}
 
@@ -70,6 +72,8 @@ public class SubmitterView extends CustomComponent implements View {
 		attachments = new LinkedList<>();
 		fileStorage = new HashMap<>();
 		request.setCreatedBy(accessControl.getUserInfo().getUser());
+        request.setLastModifiedBy(accessControl.getPrincipalName());
+        request.setStatus(RequestStatus.Open);
 		FileUploader fileUploader = new FileUploader(fileStorage);
 		fileUploader.setEnabled(false);
 		BeanItem<Request> item = new BeanItem<>(request);
@@ -211,7 +215,6 @@ public class SubmitterView extends CustomComponent implements View {
 	private void submitRequest() {
 		try {
 			group.commit();
-			request.setStatus(RequestStatus.Open);
 			if (!fileStorage.isEmpty()) {
 				fileStorage.forEach((k, v) -> {
 					byte[] bytes = new byte[(int) v.length()];
@@ -233,7 +236,6 @@ public class SubmitterView extends CustomComponent implements View {
 			attachments.forEach(attachment -> {
 				attachmentService.persist(attachment);
 			});
-			request.setLastModifiedBy(accessControl.getPrincipalName());
 			requestService.saveOrPersist(request);
 
 			SendGridService.sendEmail(request);
@@ -250,6 +252,8 @@ public class SubmitterView extends CustomComponent implements View {
 		}
 		request = new Request();
 		request.setCreatedBy(accessControl.getUserInfo().getUser());
+        request.setLastModifiedBy(accessControl.getPrincipalName());
+        request.setStatus(RequestStatus.Open);
 		group.clear();
 		table.removeAllItems();
 

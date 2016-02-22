@@ -2,16 +2,19 @@ package com.ibm.lnw.presentation.views;
 
 import com.ibm.lnw.backend.UserService;
 import com.ibm.lnw.backend.domain.User;
+import com.ibm.lnw.presentation.AppUI;
 import com.ibm.lnw.presentation.model.CustomAccessControl;
 import com.ibm.lnw.presentation.views.events.UserEvent;
 import com.vaadin.cdi.CDIView;
-import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.*;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 import org.vaadin.viritin.button.MButton;
 import org.vaadin.viritin.fields.MTable;
 import org.vaadin.viritin.label.Header;
@@ -46,12 +49,12 @@ public class AdminView extends MVerticalLayout implements View {
 
 	@Override
 	public void enter(ViewChangeListener.ViewChangeEvent viewChangeEvent) {
-        System.out.println("In adminView.enter()");
+        /*System.out.println("In adminView.enter()");
 		if (!accessControl.isUserInRole("Administrator")) {
 			Notification.show("You do not have access to perform this operation", Notification.Type.WARNING_MESSAGE);
 			Navigator navigator = UI.getCurrent().getNavigator();
 			navigator.navigateTo("request-list");
-		}
+		}*/
 
 	}
 
@@ -80,8 +83,8 @@ public class AdminView extends MVerticalLayout implements View {
 	}
 
 	private void adjustTableColumns() {
-		/*userMTable.setVisibleColumns(new Object[]{"firstName", "lastName", "userRole"});
-		userMTable.setColumnHeaders(new String[]{"First name", "Last name", "Type of access"});*/
+		userMTable.setVisibleColumns(new Object[]{"firstName", "lastName", "userRole"});
+		userMTable.setColumnHeaders(new String[]{"First name", "Last name", "Type of access"});
 	}
 
 	private void listUsers() {
@@ -117,7 +120,7 @@ public class AdminView extends MVerticalLayout implements View {
 		if (userForm.getParent() == mainContent) {
 			mainContent.removeComponent(userForm);
 		} else {
-			//AppUI.get().getContentLayout().replaceComponent(userForm, this);
+			AppUI.getInstance().getContentLayout().replaceComponent(userForm, this);
 		}
 	}
 

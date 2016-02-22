@@ -4,6 +4,7 @@ import com.ibm.lnw.backend.UserService;
 import com.ibm.lnw.backend.domain.User;
 import com.ibm.lnw.presentation.AppUI;
 import com.ibm.lnw.presentation.model.CustomAccessControl;
+import com.ibm.lnw.presentation.model.UserInfo;
 import com.ibm.lnw.presentation.views.events.LoginEvent;
 import com.vaadin.cdi.CDIView;
 import com.vaadin.event.ShortcutAction;
@@ -38,6 +39,9 @@ public class LoginView extends CustomComponent implements View {
 	@Inject
 	private CustomAccessControl accessControl;
 
+    @Inject
+    private UserInfo userInfo;
+
 	@Inject
 	@LoginEvent(LoginEvent.Type.LOGIN_SUCCEEDED)
 	private javax.enterprise.event.Event<User> authenticatedUser;
@@ -48,7 +52,8 @@ public class LoginView extends CustomComponent implements View {
 		if (accessControl.isUserSignedIn()) {
             AppUI.getMenu().setVisible(false);
 			Notification.show("Log out", "You have been logged out", Notification.Type.TRAY_NOTIFICATION);
-            accessControl.getUserInfo().setUser(null);
+//            accessControl.getUserInfo().setUser(null);
+            userInfo.setUser(null);
 		}
 		username.focus();
 	}

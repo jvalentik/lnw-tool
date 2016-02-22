@@ -1,13 +1,13 @@
 package com.ibm.lnw.presentation;
 
 import com.ibm.lnw.backend.domain.User;
-import com.ibm.lnw.presentation.model.UserInfo;
+import com.ibm.lnw.presentation.model.CustomAccessControl;
 import com.ibm.lnw.presentation.views.events.LoginEvent;
 import com.ibm.lnw.presentation.views.events.NavigationEvent;
 import com.vaadin.cdi.CDIViewProvider;
 import com.vaadin.cdi.NormalUIScoped;
 import com.vaadin.navigator.Navigator;
-import com.vaadin.ui.UI;
+import com.vaadin.ui.Notification;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.event.Observes;
@@ -22,8 +22,9 @@ public class NavigationServiceImpl implements NavigationService {
     @Inject
     private CDIViewProvider viewProvider;
 
+
     @Inject
-    private UserInfo currentUser;
+    private CustomAccessControl accessControl;
 
     @Inject
     private AppUI ui;
@@ -43,17 +44,20 @@ public class NavigationServiceImpl implements NavigationService {
         try {
             ui.getNavigator().navigateTo(event.getNavigateTo());
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            handleNavigationError();
         }
     }
 
+    private void handleNavigationError() {
+        Notification.show("Unfortunatelly, you are not authorized to perform this action", Notification.Type.WARNING_MESSAGE);
+    }
 
     @Override
     public void onSuccessfulLoginEvent(@Observes @LoginEvent(LoginEvent.Type.LOGIN_SUCCEEDED)User user) {
-        currentUser.setUser(user);
+        accessControl.getUserInfo().setUser(user);
         Navigator navigator = new Navigator(ui, ui.viewMenuLayout.getMainContent());
         navigator.addProvider(viewProvider);
-        UI.getCurrent().setContent(ui.getViewMenuLayout());
+        AppUI.getCurrent().setContent(ui.getViewMenuLayout());
         AppUI.getMenu().setVisible(true);
         navigationEvent.fire(new NavigationEvent("submitter-view"));
     }

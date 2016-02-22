@@ -20,13 +20,14 @@ import java.util.Set;
 						" :filter2 OR LOWER(r.customerName) LIKE :filter2)"),
 		@NamedQuery(name="Request.findByID", query = "SELECT r FROM Request r WHERE r.id=:filter"),
 		@NamedQuery(name="Request.findByFilter", query = "SELECT r FROM Request r WHERE LOWER(r.leadingWBS) LIKE " +
-				":filter OR LOWER(r.customerName) LIKE :filter")
+				":filter OR LOWER(r.customerName) LIKE :filter"),
+    @NamedQuery(name = "Request.findAssigned", query = "SELECT r FROM Request r WHERE r.pmaName =:filter")
 })
 @Entity
 public class Request implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+    private long id;
 
 	@NotNull
 	@Pattern(regexp = "([a-zA-Z]\\.)+(\\w{5}\\.)+(\\d{3})", message = "WBS must be in format x.xxxxx.xxx")
@@ -43,14 +44,15 @@ public class Request implements Serializable {
 	private String comments;
 
 	@ManyToOne
-	private User createdBy;
+    @JoinColumn(name = "CREATEDBY_ID")
+    private User createdBy;
 
 	private String lastModifiedBy;
 
 	@Temporal(TemporalType.DATE)
 	private Date modifiedOn;
 
-	@OneToMany(mappedBy = "mainRequest")
+	@OneToMany(mappedBy = "mainRequest",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private Set<Attachment> attachmentSet;
 
     @Temporal(TemporalType.DATE)
@@ -63,9 +65,10 @@ public class Request implements Serializable {
 		customerName = contractNumber = services = pmaName = pexName = comments = leadingWBS ="";
 		dateTimeStamp = new Date();
 		modifiedOn = dateTimeStamp;
-
 		status = RequestStatus.Open;
 	}
+
+
 
    	public String getCustomerName() {
 		return customerName;

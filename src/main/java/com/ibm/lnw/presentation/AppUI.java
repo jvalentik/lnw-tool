@@ -43,5 +43,9 @@ public class AppUI extends UI {
         return ((AppUI) UI.getCurrent()).getViewMenuLayout().getViewMenu();
     }
 
+    public static AppUI getInstance() {
+        return (AppUI) UI.getCurrent();
+    }
+
 
 }

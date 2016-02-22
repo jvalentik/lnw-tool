@@ -181,7 +181,7 @@ public class CustomFileDownloader extends FileDownloader {
 
         if (resource != null && filePath != null) {
             this.resource.setFilePath(filePath);
-            ;
+
         }
     }
 

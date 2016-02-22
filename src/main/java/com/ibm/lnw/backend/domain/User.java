@@ -24,7 +24,7 @@ import java.util.Set;
 public class User implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+    private long id;
 
 	@NotNull(message = "IBM Intranet ID is required")
 	@Pattern(regexp = ".*@([a-zA-Z]{2})\\.(ibm|IBM)\\.(com|COM)", message = "IBM Intranet ID is required")
@@ -56,6 +56,10 @@ public class User implements Serializable {
 
 	}
 
+	public void setId(long id) {
+		this.id = id;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof User) {
@@ -74,10 +78,6 @@ public class User implements Serializable {
 
 	public Long getId() {
 		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public String getFirstName() {

@@ -4,13 +4,15 @@ package com.ibm.lnw.presentation.views;
  * Created by Ján Valentík on 21. 2. 2016.
  */
 
+import com.ibm.lnw.presentation.AppUI;
+import com.ibm.lnw.presentation.model.CustomAccessControl;
+import com.ibm.lnw.presentation.views.events.NavigationEvent;
 import com.vaadin.annotations.Title;
 import com.vaadin.cdi.CDIView;
 import com.vaadin.cdi.UIScoped;
 import com.vaadin.cdi.internal.Conventions;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Resource;
 import com.vaadin.ui.*;
@@ -48,6 +50,12 @@ public class ViewMenu extends CssLayout {
 
     @Inject
     BeanManager beanManager;
+
+    @Inject
+    private CustomAccessControl accessControl;
+
+    @Inject
+    private javax.enterprise.event.Event<NavigationEvent> navigationEvent;
 
     private final Header header = new Header(null).setHeaderLevel(3);
 
@@ -100,7 +108,11 @@ public class ViewMenu extends CssLayout {
                 }
             }
         });
-        // TODO check if accessible for current user
+        /*// TODO check if accessible for current user
+        RolesAllowed rolesAllowedAnotation;
+        list.stream().filter(bean -> {
+
+        });*/
         return list;
     }
 
@@ -135,7 +147,7 @@ public class ViewMenu extends CssLayout {
                                   if (getMenuTitle() == null) {
                                       setMenuTitle(detectMenuTitle());
                                   }
-                                  Navigator navigator = UI.getCurrent().getNavigator();
+                                  Navigator navigator = AppUI.getInstance().getCurrent().getNavigator();
                                   if (navigator != null) {
                                       String state = navigator.getState();
                                       if (state == null) {
@@ -274,23 +286,21 @@ public class ViewMenu extends CssLayout {
         }
     }
 
-    public View navigateTo(final Class<?> viewClass) {
+    public void navigateTo(final Class<?> viewClass) {
         CDIView cdiview = viewClass.getAnnotation(CDIView.class);
         String viewId = cdiview.value();
         if (CDIView.USE_CONVENTIONS.equals(viewId)) {
             viewId = Conventions.deriveMappingForView(viewClass);
         }
-        return navigateTo(viewId);
+        navigateTo(viewId);
     }
 
-    public View navigateTo(final String viewId) {
+    public void navigateTo(final String viewId) {
         removeStyleName("valo-menu-visible");
         Button button = nameToButton.get(viewId);
         if (button != null) {
-            final Navigator navigator = UI.getCurrent().getNavigator();
-
-            final MutableObject<View> view = new MutableObject<>();
-
+             final MutableObject<View> view = new MutableObject<>();
+/*
             ViewChangeListener l = new ViewChangeListener() {
 
                 @Override
@@ -308,11 +318,12 @@ public class ViewMenu extends CssLayout {
 
             navigator.addViewChangeListener(l);
             navigator.navigateTo(viewId);
-            navigator.removeViewChangeListener(l);
+            navigator.removeViewChangeListener(l);*/
             emphasisAsSelected(button);
-            return view.getValue();
+            navigationEvent.fire(new NavigationEvent(viewId));
+//            return view.getValue();
         }
-        return null;
+//        return null;
     }
 
     public void setSecondaryComponent(Component component) {
