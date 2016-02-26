@@ -21,8 +21,18 @@ public class AttachmentService {
 		entityManager.persist(entity);
 	}
 
-	public List<Attachment> findAllByRequestId(long requestId) {
-		return entityManager.createNamedQuery("Attachment.findAllByFilter", Attachment.class).setParameter
+	public List<Attachment> findAllByMainRequest(long requestId) {
+		return entityManager.createNamedQuery("Attachment.findByMainRequest", Attachment.class).setParameter
 				("filter", requestId).getResultList();
 	}
+
+    public long saveOrPersist(Attachment entity) {
+        if (entity.getId() > 0) {
+            entityManager.merge(entity);
+        }
+        else {
+            entityManager.persist(entity);
+        }
+        return entity.getId();
+    }
 }

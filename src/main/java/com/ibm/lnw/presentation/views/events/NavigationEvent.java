@@ -5,13 +5,24 @@ package com.ibm.lnw.presentation.views.events;
  */
 public class NavigationEvent {
     private final String navigateTo;
+    private final String navigateFrom;
+
+    public NavigationEvent(String navigateTo, String navigateFrom) {
+        this.navigateFrom = navigateFrom;
+        this.navigateTo = navigateTo;
+    }
 
     public NavigationEvent(String navigateTo) {
-        this.navigateTo = navigateTo;
+        this(navigateTo, "not provided");
+
     }
 
     public String getNavigateTo() {
         return navigateTo;
+    }
+
+    public String getNavigateFrom() {
+        return navigateFrom;
     }
 
 }

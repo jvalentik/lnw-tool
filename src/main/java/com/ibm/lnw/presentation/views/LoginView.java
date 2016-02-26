@@ -52,8 +52,8 @@ public class LoginView extends CustomComponent implements View {
 		if (accessControl.isUserSignedIn()) {
             AppUI.getMenu().setVisible(false);
 			Notification.show("Log out", "You have been logged out", Notification.Type.TRAY_NOTIFICATION);
-//            accessControl.getUserInfo().setUser(null);
             userInfo.setUser(null);
+            AppUI.getInstance().getSession().setAttribute("CURRENT_USER", null);
 		}
 		username.focus();
 	}
@@ -134,12 +134,12 @@ public class LoginView extends CustomComponent implements View {
 
 	private void login() {
 		System.out.println("View param in login: " + params);
-		User unknownUser = new User();
-		unknownUser.setUserName(username.getValue().toLowerCase().trim());
-		unknownUser.setPassword(password.getValue());
-		User foundUser = userService.findByUserName(unknownUser.getUserName().toLowerCase());
-		if (foundUser != null) {
-			if (unknownUser.equals(foundUser)) {
+		User foundUser = userService.findByUserName(username.getValue().toLowerCase().trim());
+		User newUser = new User();
+        newUser.setUserName(username.getValue().trim());
+        newUser.setPassword(password.getValue().trim());
+        if (foundUser != null) {
+			if (foundUser.equals(newUser)) {
 				System.out.println("User found");
 				if (params.contains("?request_id=")) {
 					System.out.println("Navigating to: " + "request-list/?request_id=" + params.split("=")[1]);
@@ -147,11 +147,9 @@ public class LoginView extends CustomComponent implements View {
 					navigator.navigateTo("request-list/?request_id=" + params.split("=")[1]);
 				}
 				else {
-					//UI.getCurrent().getNavigator().navigateTo("submitter-view");
-					authenticatedUser.fire(foundUser);
+                    authenticatedUser.fire(foundUser);
 				}
 			} else {
-				//this.currentUser.setUser(null);
 				Notification notification = new Notification("Login failed", "Please check your username and password and" +
 						" try again", Notification.Type.HUMANIZED_MESSAGE);
 				notification.setDelayMsec(2000);
@@ -159,7 +157,6 @@ public class LoginView extends CustomComponent implements View {
 			}
 		}
 		else {
-			//this.currentUser.setUser(null);
 			Notification notification = new Notification("Login failed", "Please check your username and password and" +
 					" try again", Notification.Type.HUMANIZED_MESSAGE);
 			notification.setDelayMsec(2000);

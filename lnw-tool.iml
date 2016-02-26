@@ -23,9 +23,16 @@
         <setting name="validation-enabled" value="true" />
         <setting name="provider-name" value="EclipseLink" />
         <datasource-mapping>
-          <factory-entry name="application-pu" value="78abb042-1fc1-4b85-ba59-ca6eccc35a8c" />
+          <factory-entry name="application-pu" value="af9cfa36-012d-4777-aceb-6010da1e36c9" />
         </datasource-mapping>
         <deploymentDescriptor name="persistence.xml" url="file://$MODULE_DIR$/src/main/resources/META-INF/persistence.xml" />
+      </configuration>
+    </facet>
+    <facet type="ejb" name="EJB">
+      <configuration>
+        <ejbRoots>
+          <root url="file://$MODULE_DIR$/src/main/java" />
+        </ejbRoots>
       </configuration>
     </facet>
   </component>
@@ -39,6 +46,20 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Maven: com.vaadin:vaadin-server:7.6.3" level="project" />
+    <orderEntry type="library" name="Maven: com.vaadin:vaadin-sass-compiler:0.9.13" level="project" />
+    <orderEntry type="library" name="Maven: com.yahoo.platform.yui:yuicompressor:2.4.8" level="project" />
+    <orderEntry type="library" name="Maven: rhino:js:1.7R2" level="project" />
+    <orderEntry type="library" name="Maven: com.vaadin:vaadin-shared:7.6.3" level="project" />
+    <orderEntry type="library" name="Maven: org.jsoup:jsoup:1.8.3" level="project" />
+    <orderEntry type="library" name="Maven: com.vaadin:vaadin-themes:7.6.3" level="project" />
+    <orderEntry type="library" name="Maven: org.vaadin:viritin:1.44" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.commons:commons-lang3:3.4" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.vaadin:vaadin-client-compiler:7.6.3" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.vaadin:vaadin-client:7.6.3" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Vaadin Client" level="project" />
+    <orderEntry type="library" name="Vaadin Server" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: javax:javaee-web-api:7.0" level="project" />
     <orderEntry type="library" name="Maven: com.vaadin:vaadin-server:7.6.3" level="project" />
     <orderEntry type="library" name="Maven: com.vaadin:vaadin-sass-compiler:0.9.13" level="project" />
     <orderEntry type="library" name="Maven: org.w3c.css:sac:1.3" level="project" />
@@ -124,7 +145,5 @@
     <orderEntry type="library" name="Maven: com.sendgrid:smtpapi-java:1.2.0" level="project" />
     <orderEntry type="library" name="Maven: javax:javaee-web-api:7.0" level="project" />
     <orderEntry type="library" name="Maven: javax:javaee-web-api:7.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Vaadin Client" level="project" />
-    <orderEntry type="library" name="Vaadin Server" level="project" />
   </component>
 </module>

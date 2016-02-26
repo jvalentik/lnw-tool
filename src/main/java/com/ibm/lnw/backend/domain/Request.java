@@ -5,6 +5,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -24,9 +25,11 @@ import java.util.Set;
     @NamedQuery(name = "Request.findAssigned", query = "SELECT r FROM Request r WHERE r.pmaName =:filter")
 })
 @Entity
+@Table(name = "REQUEST")
 public class Request implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID")
     private long id;
 
 	@NotNull
@@ -44,7 +47,7 @@ public class Request implements Serializable {
 	private String comments;
 
 	@ManyToOne
-    @JoinColumn(name = "CREATEDBY_ID")
+    @JoinColumn(name = "CREATEDBY_ID", referencedColumnName = "ID")
     private User createdBy;
 
 	private String lastModifiedBy;
@@ -52,8 +55,8 @@ public class Request implements Serializable {
 	@Temporal(TemporalType.DATE)
 	private Date modifiedOn;
 
-	@OneToMany(mappedBy = "mainRequest",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	private Set<Attachment> attachmentSet;
+	@OneToMany(mappedBy = "mainRequest", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	private Set<Attachment> attachmentSet = new HashSet<Attachment>();
 
     @Temporal(TemporalType.DATE)
 	private Date dateTimeStamp;
@@ -130,14 +133,6 @@ public class Request implements Serializable {
 		this.leadingWBS = leadingWBS.trim();
 	}
 
-	public Long getId() {
-		return id;
-	}
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public void setDateTimeStamp(Date dateTimeStamp) {
         this.dateTimeStamp = dateTimeStamp;
     }
@@ -150,19 +145,27 @@ public class Request implements Serializable {
 		this.status = status;
 	}
 
-	public User getCreatedBy() {
+    public void setAttachmentSet(Set<Attachment> attachmentSet) {
+        this.attachmentSet = attachmentSet;
+    }
+
+    public User getCreatedBy() {
 		return createdBy;
 	}
 
 	public void setCreatedBy(User createdBy) {
-		this.createdBy = createdBy;
-	}
+        this.createdBy = createdBy;
+    }
 
 	public void setId(long id) {
 		this.id = id;
 	}
 
-	public String getLastModifiedBy() {
+    public long getId() {
+        return id;
+    }
+
+    public String getLastModifiedBy() {
 		return lastModifiedBy;
 	}
 
@@ -182,7 +185,6 @@ public class Request implements Serializable {
 		return attachmentSet;
 	}
 
-	public void setAttachmentSet(Set<Attachment> attachmentSet) {
-		this.attachmentSet = attachmentSet;
+	public void addAttachment(Attachment attachment)  {   attachmentSet.add(attachment);
 	}
 }

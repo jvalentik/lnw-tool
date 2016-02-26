@@ -2,17 +2,16 @@ package com.ibm.lnw.presentation.views;
 
 import com.ibm.lnw.backend.RequestService;
 import com.ibm.lnw.backend.domain.Request;
-import com.ibm.lnw.presentation.AppUI;
+import com.ibm.lnw.backend.domain.RequestStatus;
 import com.ibm.lnw.presentation.model.CustomAccessControl;
 import com.ibm.lnw.presentation.views.events.RequestEvent;
 import com.vaadin.cdi.CDIView;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Page;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.TextField;
 import org.vaadin.viritin.fields.MTable;
 import org.vaadin.viritin.label.Header;
@@ -45,28 +44,32 @@ public class RequestListView extends MVerticalLayout implements View {
 
 	TextField filter = new TextField();
 
-    CheckBox switchFilter = new CheckBox("Assigned to me");
+    OptionGroup filterSettings = new OptionGroup("Filter by:");
 
 	Header header = new Header("LNW Requests").setHeaderLevel(2);
+
+    private boolean allRequests;
 
 	@PostConstruct
 	public void init() {
         requestMTable.addMValueChangeListener(mValueChangeEvent -> editRequest(mValueChangeEvent.getValue()));
 		filter.setInputPrompt("Filter requests...");
 		filter.addTextChangeListener(textChangeEvent -> listRequests(textChangeEvent.getText()));
+        filterSettings.addItems( Boolean.TRUE , Boolean.FALSE );
+        filterSettings.setItemCaption( Boolean.TRUE , "Assigned to me" );
+        filterSettings.setItemCaption( Boolean.FALSE , "All requests" );
+        filterSettings.setValue( Boolean.FALSE );
+        filterSettings.addValueChangeListener(valueChangeEvent -> {
+            listRequests();
+        });
 		layout();
 		adjustTableColumns();
-        AppUI.getCurrent().setResizeLazy(true);
-		Page.getCurrent().addBrowserWindowResizeListener(browserWindowResizeEvent -> {
-			adjustTableColumns();
-			layout();
-		});
-		listRequests();
+       	listRequests();
 	}
 
 	private void layout() {
 		removeAllComponents();
-		addComponents(new MHorizontalLayout(header,switchFilter, filter)
+		addComponents(new MHorizontalLayout(header,filterSettings, filter)
 							.expand(header)
 							.alignAll(Alignment.MIDDLE_LEFT),
 					mainContent
@@ -75,9 +78,9 @@ public class RequestListView extends MVerticalLayout implements View {
 		setMargin(new MarginInfo(false, true, true, true));
 		expand(mainContent);
         if (!accessControl.isUserInRole("Record_Owner")) {
-            switchFilter.setVisible(false);
+            filterSettings.setVisible(false);
         }
-        switchFilter.addValueChangeListener(valueChangeEvent -> listRequests());
+
 	}
 
 	private void adjustTableColumns() {
@@ -87,16 +90,16 @@ public class RequestListView extends MVerticalLayout implements View {
 	}
 
     private void listRequests() {
-        System.out.println("CurrentUser role INITIATOR: " + accessControl.isUserInRole("Initiator"));
-        System.out.println(accessControl.getPrincipalName());
         if (accessControl.isUserInRole("Initiator")) {
             requestMTable.setBeans(new ArrayList<>(requestService.findAllByUser(accessControl.getPrincipalName())));
         }
         else {
-            if (switchFilter.getValue()) {
+            if (filterSettings.getValue() == Boolean.TRUE) {
                 requestMTable.setBeans(new ArrayList<>(requestService.findAssigned(accessControl.getPrincipalName())));
             }
-            requestMTable.setBeans(new ArrayList<>(requestService.findAll()));
+            else {
+                requestMTable.setBeans(new ArrayList<>(requestService.findAll()));
+            }
         }
     }
 	private void listRequests(String  filter) {
@@ -124,8 +127,13 @@ public class RequestListView extends MVerticalLayout implements View {
 	}
 
 	private void openEditor(Request request) {
-
 		requestForm.setEntity(request);
+        if (accessControl.isUserInRole("Initiator") && request.getStatus() != RequestStatus.Clarification) {
+            requestForm.setEditable(false);
+        }
+        if (accessControl.isUserInRole("Viewer")) {
+            requestForm.setEditable(false);
+        }
 		mainContent.addComponent(requestForm);
         requestForm.focusFirst();
 	}

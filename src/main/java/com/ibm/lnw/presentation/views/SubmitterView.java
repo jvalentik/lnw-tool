@@ -1,6 +1,5 @@
 package com.ibm.lnw.presentation.views;
 
-import com.ibm.lnw.backend.AttachmentService;
 import com.ibm.lnw.backend.RequestService;
 import com.ibm.lnw.backend.domain.Attachment;
 import com.ibm.lnw.backend.domain.Contract;
@@ -22,24 +21,26 @@ import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by Jan Valentik on 11/15/2015.
  */
 @CDIView("submitter-view")
+@RolesAllowed(value = {"Initiator", "Administrator"})
 @ViewMenuItem(icon = FontAwesome.ENVELOPE, title = "New request", order = ViewMenuItem.BEGINNING)
 public class SubmitterView extends CustomComponent implements View {
 	private Table table;
 	private FieldGroup group;
 	private Request request;
-	private List<Attachment> attachments;
+	private Set<Attachment> attachments;
 	private  HashMap<String, File> fileStorage;
 
 	@Inject
@@ -48,13 +49,10 @@ public class SubmitterView extends CustomComponent implements View {
 	@Inject
 	private RequestService requestService;
 
-	@Inject
+   	@Inject
 	private Contract contract;
 
 	@Inject
-	private AttachmentService attachmentService;
-
-        @Inject
     private javax.enterprise.event.Event<NavigationEvent> navigationEvent;
 
 
@@ -69,12 +67,10 @@ public class SubmitterView extends CustomComponent implements View {
 	@PostConstruct
 	public void init() {
 		request = new Request();
-		attachments = new LinkedList<>();
+        attachments = new HashSet<>();
 		fileStorage = new HashMap<>();
-		request.setCreatedBy(accessControl.getUserInfo().getUser());
-        request.setLastModifiedBy(accessControl.getPrincipalName());
-        request.setStatus(RequestStatus.Open);
-		FileUploader fileUploader = new FileUploader(fileStorage);
+
+        FileUploader fileUploader = new FileUploader(fileStorage);
 		fileUploader.setEnabled(false);
 		BeanItem<Request> item = new BeanItem<>(request);
 		group = new FieldGroup(item);
@@ -159,7 +155,7 @@ public class SubmitterView extends CustomComponent implements View {
 		table.setColumnFooter("WBS", "Add more WBS...");
 		table.addFooterClickListener((footerClickEvent) -> {
 			AddEntryDialogView dialogView = new AddEntryDialogView(((TextField) group.getField("contractNumber"))
-					.getValue(),table, attachments, contract);
+					.getValue(),table, attachments, contract,request);
 			UI.getCurrent().addWindow(dialogView);
 
 		});
@@ -222,22 +218,23 @@ public class SubmitterView extends CustomComponent implements View {
 						Attachment attachment = new Attachment();
 						FileInputStream fileInputStream = new FileInputStream(v);
 						fileInputStream.read(bytes);
+                        attachment.setMainRequest(request);
 						attachment.setWbsId(request.getLeadingWBS());
 						attachment.setFileName(k.split("\\?")[0]);
 						attachment.setMimeType(k.split("\\?")[1]);
 						attachment.setFileContent(bytes);
 						fileInputStream.close();
-						attachments.add(attachment);
-					} catch (IOException ex) {
+                    } catch (IOException ex) {
 						Notification.show("Saving file failed", Notification.Type.WARNING_MESSAGE);
 					}
 				});
 			}
-			attachments.forEach(attachment -> {
-				attachmentService.persist(attachment);
-			});
-			requestService.saveOrPersist(request);
-
+		    request.setCreatedBy(accessControl.getUserInfo().getUser());
+            request.setLastModifiedBy(accessControl.getPrincipalName());
+            request.setStatus(RequestStatus.Open);
+            System.out.println(request.getCreatedBy().getId());
+            System.out.println(request.getAttachmentSet().size());
+            requestService.saveOrPersist(request);
 			SendGridService.sendEmail(request);
 			Notification.show("Your request has been submitted", Notification.Type.TRAY_NOTIFICATION);
 		}
@@ -251,9 +248,6 @@ public class SubmitterView extends CustomComponent implements View {
 			Notification.show("Email not sent", "Failed to send notification email", Notification.Type.WARNING_MESSAGE);
 		}
 		request = new Request();
-		request.setCreatedBy(accessControl.getUserInfo().getUser());
-        request.setLastModifiedBy(accessControl.getPrincipalName());
-        request.setStatus(RequestStatus.Open);
 		group.clear();
 		table.removeAllItems();
 

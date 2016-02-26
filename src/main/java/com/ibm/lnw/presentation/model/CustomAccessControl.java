@@ -1,5 +1,6 @@
 package com.ibm.lnw.presentation.model;
 
+import com.vaadin.cdi.UIScoped;
 import com.vaadin.cdi.access.AccessControl;
 
 import javax.enterprise.inject.Alternative;
@@ -9,6 +10,7 @@ import javax.inject.Inject;
  * Created by Jan Valentik on 11/20/2015.
  */
 @Alternative
+@UIScoped
 public class CustomAccessControl extends AccessControl {
 
 	@Inject

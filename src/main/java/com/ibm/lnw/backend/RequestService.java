@@ -30,7 +30,6 @@ public class RequestService {
         else {
             entityManager.persist(entity);
         }
-		entityManager.flush();
 		return entity.getId();
 	}
 

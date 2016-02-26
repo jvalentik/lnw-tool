@@ -7,7 +7,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
-import java.util.Set;
 
 /**
  * Created by Jan Valentik on 11/20/2015.
@@ -21,14 +20,16 @@ import java.util.Set;
 })
 
 @Entity
+@Table(name = "USER")
 public class User implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+     private long id;
 
 	@NotNull(message = "IBM Intranet ID is required")
 	@Pattern(regexp = ".*@([a-zA-Z]{2})\\.(ibm|IBM)\\.(com|COM)", message = "IBM Intranet ID is required")
-	private String userName;
+	@Column(unique = true, nullable = false)
+    private String userName;
 
 	@Size(min = 5, message = "Password must be at least 5 characters")
 	private String password;
@@ -42,18 +43,9 @@ public class User implements Serializable {
 	@Enumerated(EnumType.ORDINAL)
 	private UserRole userRole;
 
-	@Enumerated(EnumType.ORDINAL)
-	private Permissions permissions;
-
-	@OneToMany(mappedBy = "createdBy")
-	private Set<Request> requestSet;
-
-
 	public User() {
 		password = lastName = firstName = userName = "";
 		userRole = UserRole.Initiator;
-		permissions = Permissions.Create;
-
 	}
 
 	public void setId(long id) {
@@ -74,10 +66,6 @@ public class User implements Serializable {
 
 	public void setUserName(String userName) {
 		this.userName = userName;
-	}
-
-	public Long getId() {
-		return id;
 	}
 
 	public String getFirstName() {
@@ -112,28 +100,17 @@ public class User implements Serializable {
 		this.userRole = userRole;
 	}
 
-	public Set<Request> getRequestSet() {
-		return requestSet;
-	}
-
-	public void setRequestSet(Set<Request> requestSet) {
-		this.requestSet = requestSet;
-	}
-
-	public Permissions getPermissions() {
-		return permissions;
-	}
-
-	public void setPermissions(Permissions permissions) {
-		this.permissions = permissions;
-	}
-
 	public boolean isPersisted() {
 		return id > 0;
 	}
 
-	@Override
+
+    public long getId() {
+        return id;
+    }
+
+    @Override
 	public String toString() {
-		return userName + " " + password + " " + firstName + " " + lastName + " " + userRole;
+		return firstName + " " + lastName;
 	}
 }

@@ -9,12 +9,10 @@ import com.vaadin.cdi.CDIView;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Page;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
 import org.vaadin.viritin.button.MButton;
 import org.vaadin.viritin.fields.MTable;
 import org.vaadin.viritin.label.Header;
@@ -22,6 +20,7 @@ import org.vaadin.viritin.layouts.MHorizontalLayout;
 import org.vaadin.viritin.layouts.MVerticalLayout;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.security.RolesAllowed;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -30,6 +29,7 @@ import java.util.ArrayList;
  * Created by Jan Valentik on 12/21/2015.
  */
 @CDIView("admin-view")
+@RolesAllowed(value = {"Administrator"})
 @ViewMenuItem(icon = FontAwesome.USERS, title = "Administrator", order = 3)
 public class AdminView extends MVerticalLayout implements View {
 	@Inject
@@ -49,12 +49,6 @@ public class AdminView extends MVerticalLayout implements View {
 
 	@Override
 	public void enter(ViewChangeListener.ViewChangeEvent viewChangeEvent) {
-        /*System.out.println("In adminView.enter()");
-		if (!accessControl.isUserInRole("Administrator")) {
-			Notification.show("You do not have access to perform this operation", Notification.Type.WARNING_MESSAGE);
-			Navigator navigator = UI.getCurrent().getNavigator();
-			navigator.navigateTo("request-list");
-		}*/
 
 	}
 
@@ -66,11 +60,6 @@ public class AdminView extends MVerticalLayout implements View {
         filter.addTextChangeListener(textChangeEvent -> listUsers(textChangeEvent.getText()));
 		layout();
 		adjustTableColumns();
-		UI.getCurrent().setResizeLazy(true);
-		Page.getCurrent().addBrowserWindowResizeListener(browserWindowResizeEvent -> {
-			adjustTableColumns();
-			layout();
-		});
 		listUsers();
 	}
 

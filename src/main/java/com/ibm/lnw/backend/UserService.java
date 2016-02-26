@@ -24,7 +24,7 @@ public class UserService {
 		} else {
 			entityManager.persist(entity);
 		}
-		entityManager.flush();
+
 	}
 
 	public void deleteEntity(User entity) {

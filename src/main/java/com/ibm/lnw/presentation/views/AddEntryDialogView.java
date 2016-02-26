@@ -13,7 +13,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Jan Valentik on 11/15/2015.
@@ -23,13 +23,14 @@ public class AddEntryDialogView extends Window {
 	private TextField wbsField;
 	private HashMap<String, File> fileStorage;
 
-	public AddEntryDialogView(String contractNumber, Table table, List<Attachment> attachments, Contract contract) {
+	public AddEntryDialogView(String contractNumber, Table table, Set<Attachment> attachments, Contract contract,
+                              Request request) {
 		wbsField = new TextField("WBS");
 		fileStorage = new HashMap<>();
-		init(contractNumber, table, attachments, contract);
+		init(contractNumber, table, attachments, contract, request);
 	}
 
-	private void init(String contractNumber, Table table, List<Attachment> attachments, Contract contract) {
+	private void init(String contractNumber, Table table, Set<Attachment> attachments, Contract contract, Request request) {
 		Button addButton = new Button("Add");
 		addButton.setWidth("90px");
 		addButton.setEnabled(false);
@@ -95,6 +96,8 @@ public class AddEntryDialogView extends Window {
 						attachment.setFileName(k.split("\\?")[0]);
 						attachment.setMimeType(k.split("\\?")[1]);
 						attachment.setFileContent(bytes);
+                        attachment.setMainRequest(request);
+                        request.getAttachmentSet().add(attachment);
 						fileInputStream.close();
 						attachments.add(attachment);
 					} catch (IOException ex) {
