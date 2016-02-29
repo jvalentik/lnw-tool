@@ -57,15 +57,9 @@ public class NavigationServiceImpl implements NavigationService {
     @Override
     public void onSuccessfulLoginEvent(@Observes @LoginEvent(LoginEvent.Type.LOGIN_SUCCEEDED)User user) {
         try {
-            // lock the current HTTP session in a try-finally-block
             VaadinSession.getCurrent().getLockInstance().lock();
-            // Initialize a session-scoped variable with the name given by
-            // the constant SESSION_SCOPED_VALUE_ID. We're using a Vaadin
-            // property as the data of the session variable so that the data
-            // can be changed with a textfield and displayed in a label.
             VaadinSession.getCurrent().setAttribute("CURRENT_USER", user);
         } finally {
-            // safely unlock the session in a finally block
             VaadinSession.getCurrent().getLockInstance().unlock();
         }
         accessControl.getUserInfo().setUser(user);
@@ -74,6 +68,6 @@ public class NavigationServiceImpl implements NavigationService {
         AppUI.getInstance().getSession().setAttribute("currentUser", user.getUserName());
         AppUI.getCurrent().setContent(ui.getViewMenuLayout());
         AppUI.getMenu().setVisible(true);
-        navigationEvent.fire(new NavigationEvent("request-list"));
+       // navigationEvent.fire(new NavigationEvent("request-list"));
     }
 }

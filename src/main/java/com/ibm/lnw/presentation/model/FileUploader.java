@@ -17,10 +17,11 @@ public class FileUploader extends MultiFileUpload {
 		this.fileStorage = fileStorage;
 	}
 
-	@Override
+
+
+    @Override
 	protected void handleFile(File file, String fileName, String mimeType, long length) {
-		fileStorage.put(fileName + "?" + mimeType, file);
-		System.out.println(fileName + " " + mimeType);
+		fileStorage.put(fileName, file);
 		Notification.show(fileName + " uploaded successfully", Notification.Type.TRAY_NOTIFICATION);
 	}
 

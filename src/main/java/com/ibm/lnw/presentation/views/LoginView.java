@@ -6,9 +6,9 @@ import com.ibm.lnw.presentation.AppUI;
 import com.ibm.lnw.presentation.model.CustomAccessControl;
 import com.ibm.lnw.presentation.model.UserInfo;
 import com.ibm.lnw.presentation.views.events.LoginEvent;
+import com.ibm.lnw.presentation.views.events.NavigationEvent;
 import com.vaadin.cdi.CDIView;
 import com.vaadin.event.ShortcutAction;
-import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
@@ -45,6 +45,9 @@ public class LoginView extends CustomComponent implements View {
 	@Inject
 	@LoginEvent(LoginEvent.Type.LOGIN_SUCCEEDED)
 	private javax.enterprise.event.Event<User> authenticatedUser;
+
+    @Inject
+    private javax.enterprise.event.Event<NavigationEvent> navigationEvent;
 
 	public void enter(ViewChangeListener.ViewChangeEvent event) {
 		params = event.getParameters();
@@ -126,29 +129,26 @@ public class LoginView extends CustomComponent implements View {
 		forgottenPwd.addStyleName(ValoTheme.BUTTON_LINK);
 		forgottenPwd.addClickListener(clickEvent ->  {
 			ResetPassword dialog = new ResetPassword(userService);
-			UI.getCurrent().addWindow(dialog);
+			AppUI.getCurrent().addWindow(dialog);
 		});
 		buttons.addComponent(forgottenPwd);
 		return layout;
 	}
 
 	private void login() {
-		System.out.println("View param in login: " + params);
 		User foundUser = userService.findByUserName(username.getValue().toLowerCase().trim());
 		User newUser = new User();
         newUser.setUserName(username.getValue().trim());
         newUser.setPassword(password.getValue().trim());
         if (foundUser != null) {
 			if (foundUser.equals(newUser)) {
-				System.out.println("User found");
-				if (params.contains("?request_id=")) {
-					System.out.println("Navigating to: " + "request-list/?request_id=" + params.split("=")[1]);
-					Navigator navigator = UI.getCurrent().getNavigator();
-					navigator.navigateTo("request-list/?request_id=" + params.split("=")[1]);
-				}
-				else {
-                    authenticatedUser.fire(foundUser);
-				}
+                authenticatedUser.fire(foundUser);
+                String requestParam = "";
+                if (params.contains("?request_id=")) {
+                    requestParam = "/?request_id=" + params.split("=")[1];
+                }
+                navigationEvent.fire(new NavigationEvent("request-list" + requestParam));
+
 			} else {
 				Notification notification = new Notification("Login failed", "Please check your username and password and" +
 						" try again", Notification.Type.HUMANIZED_MESSAGE);

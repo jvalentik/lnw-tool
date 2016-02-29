@@ -1,5 +1,6 @@
 package com.ibm.lnw.presentation.views;
 
+import com.ibm.lnw.backend.AttachmentService;
 import com.ibm.lnw.backend.RequestService;
 import com.ibm.lnw.backend.domain.Attachment;
 import com.ibm.lnw.backend.domain.Request;
@@ -39,6 +40,9 @@ public class RequestForm extends AbstractForm<Request> {
 
     @Inject
     RequestService requestService;
+
+    @Inject
+    AttachmentService attachmentService;
 
     @Inject
     @RequestEvent(RequestEvent.Type.REFRESH)
@@ -87,7 +91,7 @@ public class RequestForm extends AbstractForm<Request> {
         status.setOptions(RequestStatus.values());
         downloader.addAdvancedDownloaderListener(downloadEvent -> {
             final String TEMP_FILE_DIR = new File(System.getProperty("java.io.tmpdir")).getPath();
-            Set<Attachment> attachments = getEntity().getAttachmentSet();
+            List<Attachment> attachments = attachmentService.findAllByMainRequest(getEntity().getId());
             List<String> toBeZipped = new ArrayList<>();
             attachments.forEach(attachment1 -> {
                 File newAttachment = new File(TEMP_FILE_DIR + File.separator + attachment1.getFileName());

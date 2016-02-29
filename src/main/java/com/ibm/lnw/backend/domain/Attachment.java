@@ -8,7 +8,7 @@ import java.io.Serializable;
  */
 @NamedQueries(
         @NamedQuery(name="Attachment.findByMainRequest",
-                query="SELECT a FROM Attachment a WHERE a.mainRequest.id=:filter")
+                query="SELECT a FROM Attachment a WHERE a.mainRequest=:filter")
 
 )
 
@@ -25,12 +25,9 @@ public class Attachment implements Serializable{
 	private byte[] fileContent;
 
 
-    @ManyToOne
-    @JoinColumn(name = "REQUEST_ID", referencedColumnName = "ID")
-    private Request mainRequest;
+    private long  mainRequest;
 
 	private String fileName;
-	private String mimeType;
 	private String wbsId;
 
 	public long getId() {
@@ -65,21 +62,12 @@ public class Attachment implements Serializable{
 		this.wbsId = wbsId;
 	}
 
-	public String getMimeType() {
-		return mimeType;
-	}
-
-	public void setMimeType(String mimeType) {
-		this.mimeType = mimeType;
-	}
-
-	public Request getMainRequest() {
+	public long getMainRequest() {
 		return mainRequest;
 	}
 
-	public void setMainRequest(Request mainRequest) {
+	public void setMainRequest(long mainRequest) {
 		this.mainRequest = mainRequest;
-        mainRequest.addAttachment(this);
 	}
 
 

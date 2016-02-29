@@ -23,14 +23,13 @@ public class AddEntryDialogView extends Window {
 	private TextField wbsField;
 	private HashMap<String, File> fileStorage;
 
-	public AddEntryDialogView(String contractNumber, Table table, Set<Attachment> attachments, Contract contract,
-                              Request request) {
+	public AddEntryDialogView(String contractNumber, Table table, Set<Attachment> attachments, Contract contract) {
 		wbsField = new TextField("WBS");
 		fileStorage = new HashMap<>();
-		init(contractNumber, table, attachments, contract, request);
+		init(contractNumber, table, attachments, contract);
 	}
 
-	private void init(String contractNumber, Table table, Set<Attachment> attachments, Contract contract, Request request) {
+	private void init(String contractNumber, Table table, Set<Attachment> attachments, Contract contract) {
 		Button addButton = new Button("Add");
 		addButton.setWidth("90px");
 		addButton.setEnabled(false);
@@ -93,11 +92,8 @@ public class AddEntryDialogView extends Window {
 						FileInputStream fileInputStream = new FileInputStream(v);
 						fileInputStream.read(bytes);
 						attachment.setWbsId(wbsField.getValue());
-						attachment.setFileName(k.split("\\?")[0]);
-						attachment.setMimeType(k.split("\\?")[1]);
+						attachment.setFileName(k);
 						attachment.setFileContent(bytes);
-                        attachment.setMainRequest(request);
-                        request.getAttachmentSet().add(attachment);
 						fileInputStream.close();
 						attachments.add(attachment);
 					} catch (IOException ex) {
@@ -119,6 +115,4 @@ public class AddEntryDialogView extends Window {
 		buttons.addComponent(cancelButton);
 		parentLayout.addComponent(buttons, 0, 1);
 	}
-
-
 }

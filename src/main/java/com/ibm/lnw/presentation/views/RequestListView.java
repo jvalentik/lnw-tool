@@ -11,6 +11,7 @@ import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.TextField;
 import org.vaadin.viritin.fields.MTable;
@@ -22,6 +23,7 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.List;
 
 @CDIView(value = "request-list", supportsParameters = true)
 @ViewMenuItem(icon = FontAwesome.LIST, title = "Requests", order = 2)
@@ -84,8 +86,10 @@ public class RequestListView extends MVerticalLayout implements View {
 	}
 
 	private void adjustTableColumns() {
-		requestMTable.setVisibleColumns(new Object[] {"leadingWBS", "customerName", "dateTimeStamp", "createdBy", "status"});
-        requestMTable.setColumnHeaders(new String[] {"WBS", "Customer name", "Submitted on", "Requestor", "Current status"});
+		requestMTable.setVisibleColumns(new Object[] {"leadingWBS", "customerName", "dateTimeStamp", "createdBy",
+                "pmaName", "status"});
+        requestMTable.setColumnHeaders(new String[] {"WBS", "Customer name", "Submitted on", "Requestor","Assigned",
+                "Current status"});
 
 	}
 
@@ -155,6 +159,19 @@ public class RequestListView extends MVerticalLayout implements View {
 
 	@Override
 	public void enter(ViewChangeListener.ViewChangeEvent event) {
+       if (event.getParameters().contains("?request_id=")) {
+            List<Request> foundRequests = requestService.findByID(Integer.parseInt(event.getParameters().split("=")[1]));
+            if (!foundRequests.isEmpty()) {
+                editRequest(foundRequests.get(0));
+            }
+            else {
+                Notification.show("Request not found", "The request you were trying to open is inaccessible to you",
+                        Notification.Type.WARNING_MESSAGE);
+            }
+
+        }
 
 	}
+
+
 }

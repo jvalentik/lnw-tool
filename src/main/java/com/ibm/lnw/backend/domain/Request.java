@@ -55,10 +55,7 @@ public class Request implements Serializable {
 	@Temporal(TemporalType.DATE)
 	private Date modifiedOn;
 
-	@OneToMany(mappedBy = "mainRequest", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	private Set<Attachment> attachmentSet = new HashSet<Attachment>();
-
-    @Temporal(TemporalType.DATE)
+	@Temporal(TemporalType.DATE)
 	private Date dateTimeStamp;
 
 	@Enumerated(EnumType.ORDINAL)
@@ -145,10 +142,6 @@ public class Request implements Serializable {
 		this.status = status;
 	}
 
-    public void setAttachmentSet(Set<Attachment> attachmentSet) {
-        this.attachmentSet = attachmentSet;
-    }
-
     public User getCreatedBy() {
 		return createdBy;
 	}
@@ -181,10 +174,4 @@ public class Request implements Serializable {
 		this.modifiedOn = modifiedOn;
 	}
 
-	public Set<Attachment> getAttachmentSet() {
-		return attachmentSet;
-	}
-
-	public void addAttachment(Attachment attachment)  {   attachmentSet.add(attachment);
-	}
 }

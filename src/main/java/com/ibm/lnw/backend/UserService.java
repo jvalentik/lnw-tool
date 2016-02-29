@@ -42,9 +42,12 @@ public class UserService {
 	}
 
 	public List<User> findByName(String filter) {
+        if (filter == null || filter.isEmpty()) {
+            return findAll();
+        }
 		return entityManager.createNamedQuery("User.findByName",
 				User.class)
-				.setParameter("filter", filter).getResultList();
+				.setParameter("filter", filter + "%").getResultList();
 	}
 
     public User findByUserName(String userName) {

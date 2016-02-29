@@ -1,10 +1,12 @@
 package com.ibm.lnw.presentation.views;
 
+import com.ibm.lnw.backend.AttachmentService;
 import com.ibm.lnw.backend.RequestService;
 import com.ibm.lnw.backend.domain.Attachment;
 import com.ibm.lnw.backend.domain.Contract;
 import com.ibm.lnw.backend.domain.Request;
 import com.ibm.lnw.backend.domain.RequestStatus;
+import com.ibm.lnw.presentation.AppUI;
 import com.ibm.lnw.presentation.model.CustomAccessControl;
 import com.ibm.lnw.presentation.model.FileUploader;
 import com.ibm.lnw.presentation.model.SendGridService;
@@ -34,7 +36,7 @@ import java.util.Set;
  * Created by Jan Valentik on 11/15/2015.
  */
 @CDIView("submitter-view")
-@RolesAllowed(value = {"Initiator", "Administrator"})
+@RolesAllowed(value = {"Initiator"})
 @ViewMenuItem(icon = FontAwesome.ENVELOPE, title = "New request", order = ViewMenuItem.BEGINNING)
 public class SubmitterView extends CustomComponent implements View {
 	private Table table;
@@ -49,6 +51,9 @@ public class SubmitterView extends CustomComponent implements View {
 	@Inject
 	private RequestService requestService;
 
+    @Inject
+    private AttachmentService attachmentService;
+
    	@Inject
 	private Contract contract;
 
@@ -57,11 +62,11 @@ public class SubmitterView extends CustomComponent implements View {
 
 
 	public void enter(ViewChangeListener.ViewChangeEvent viewChangeEvent) {
-        System.out.println("In adminView.enter()");
+       /* System.out.println("In adminView.enter()");
         if (!accessControl.isUserInRole("Initiator") && !accessControl.isUserInRole("Administrator")) {
             Notification.show("You do not have access to perform this operation", Notification.Type.WARNING_MESSAGE);
             navigationEvent.fire(new NavigationEvent("request-list"));
-        }
+        }*/
 	}
 
 	@PostConstruct
@@ -76,6 +81,8 @@ public class SubmitterView extends CustomComponent implements View {
 		group = new FieldGroup(item);
 		VerticalLayout parentLayout = new VerticalLayout();
 
+        Button additionalWBS = new Button("Add more WBS");
+        additionalWBS.setEnabled(false);
 		Field<?> leadingWBS = group.buildAndBind("WBS", "leadingWBS");
 		leadingWBS.focus();
 		leadingWBS.addValidator(new BeanValidator(Request.class, "leadingWBS"));
@@ -102,6 +109,8 @@ public class SubmitterView extends CustomComponent implements View {
 				table.setEnabled(true);
 				group.getField("comments").setEnabled(true);
 				fileUploader.setEnabled(true);
+                additionalWBS.setEnabled(true);
+
 			}
 		});
 
@@ -151,15 +160,7 @@ public class SubmitterView extends CustomComponent implements View {
 		table.addContainerProperty("WBS", String.class, null);
 		table.setColumnWidth("WBS", 120);
 		table.addContainerProperty("Files", Integer.class, null);
-		table.setFooterVisible(true);
-		table.setColumnFooter("WBS", "Add more WBS...");
-		table.addFooterClickListener((footerClickEvent) -> {
-			AddEntryDialogView dialogView = new AddEntryDialogView(((TextField) group.getField("contractNumber"))
-					.getValue(),table, attachments, contract,request);
-			UI.getCurrent().addWindow(dialogView);
-
-		});
-		table.setRequired(true);
+		table.setFooterVisible(false);
 		table.setBuffered(true);
 
 		Label headLabel = new Label("Create new request");
@@ -174,6 +175,17 @@ public class SubmitterView extends CustomComponent implements View {
 		panel.setHeight("80%");
 		panel.setWidth("90%");
 
+        VerticalLayout buttons = new VerticalLayout();
+        buttons.addComponent(fileUploader);
+        buttons.setSpacing(true);
+
+        additionalWBS.addClickListener(clickEvent1 -> {
+            AddEntryDialogView dialogView = new AddEntryDialogView(((TextField) group.getField("contractNumber"))
+                    .getValue(),table, attachments, contract);
+            AppUI.getCurrent().addWindow(dialogView);
+        });
+        buttons.addComponent(additionalWBS);
+
 		GridLayout content = new GridLayout(3, 3);
 		content.setSizeFull();
 		content.setMargin(true);
@@ -183,9 +195,9 @@ public class SubmitterView extends CustomComponent implements View {
 		content.addComponent(servicesContractNumber, 0, 1);
 		content.addComponent(pmaName, 1, 1);
 		content.addComponent(pexName, 2, 1);
-		content.addComponent(table, 0, 2);
-		content.addComponent(comments, 1, 2);
-		content.addComponent(fileUploader, 2, 2);
+		content.addComponent(table, 1, 2);
+		content.addComponent(comments, 0, 2);
+		content.addComponent(buttons, 2, 2);
 		panel.setContent(content);
 
 		Button submit = new Button("Submit");
@@ -218,11 +230,10 @@ public class SubmitterView extends CustomComponent implements View {
 						Attachment attachment = new Attachment();
 						FileInputStream fileInputStream = new FileInputStream(v);
 						fileInputStream.read(bytes);
-                        attachment.setMainRequest(request);
-						attachment.setWbsId(request.getLeadingWBS());
-						attachment.setFileName(k.split("\\?")[0]);
-						attachment.setMimeType(k.split("\\?")[1]);
+                        attachment.setWbsId(request.getLeadingWBS());
+						attachment.setFileName(k);
 						attachment.setFileContent(bytes);
+                        attachments.add(attachment);
 						fileInputStream.close();
                     } catch (IOException ex) {
 						Notification.show("Saving file failed", Notification.Type.WARNING_MESSAGE);
@@ -232,9 +243,12 @@ public class SubmitterView extends CustomComponent implements View {
 		    request.setCreatedBy(accessControl.getUserInfo().getUser());
             request.setLastModifiedBy(accessControl.getPrincipalName());
             request.setStatus(RequestStatus.Open);
-            System.out.println(request.getCreatedBy().getId());
-            System.out.println(request.getAttachmentSet().size());
-            requestService.saveOrPersist(request);
+            long requestId = requestService.saveOrPersist(request);
+            attachments.forEach(attachment -> {
+                attachment.setMainRequest(requestId);
+                attachmentService.saveOrPersist(attachment);
+            });
+
 			SendGridService.sendEmail(request);
 			Notification.show("Your request has been submitted", Notification.Type.TRAY_NOTIFICATION);
 		}
@@ -245,12 +259,12 @@ public class SubmitterView extends CustomComponent implements View {
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
-			Notification.show("Email not sent", "Failed to send notification email", Notification.Type.WARNING_MESSAGE);
+			Notification.show("Sending failed", "Something happened and the request was not sent", Notification.Type
+                    .WARNING_MESSAGE);
 		}
 		request = new Request();
 		group.clear();
 		table.removeAllItems();
-
 	}
 
 	private void clearData() {

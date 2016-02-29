@@ -18,6 +18,6 @@ public @interface LoginEvent {
     Type value();
 
     enum Type {
-        LOGIN_FAILED, LOGIN_SUCCEEDED
+        LOGIN_SUCCEEDED
     }
 }
